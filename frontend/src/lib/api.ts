@@ -44,7 +44,7 @@ export const loginAdmin = async (credentials: any) => {
 
 // Enquiries
 export const submitEnquiry = async (enquiry: any) => {
-  const response = await fetch(`${API_URL}/enquiry`, {
+  const response = await fetch(`${API_URL}/enquiries`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ export const submitEnquiry = async (enquiry: any) => {
 };
 
 export const fetchEnquiries = async (token: string) => {
-  const response = await fetch(`${API_URL}/enquiry`, {
+  const response = await fetch(`${API_URL}/enquiries`, {
     headers: {
       'Authorization': `Bearer ${token}`
     },
@@ -66,21 +66,21 @@ export const fetchEnquiries = async (token: string) => {
 };
 
 // Profile / Resume
-export const fetchResume = async () => {
+export const fetchProfile = async () => {
   const response = await fetch(`${API_URL}/profile`);
-  if (!response.ok) throw new Error('Failed to fetch resume');
-  return response.json(); // { resume_url: '...' }
+  if (!response.ok) throw new Error('Failed to fetch profile');
+  return response.json(); // { resume_url: '...', theme_color: '...' }
 };
 
-export const updateResume = async (resumeUrl: string, token: string) => {
-  const response = await fetch(`${API_URL}/profile/resume`, {
+export const updateProfile = async (data: any, token: string) => {
+  const response = await fetch(`${API_URL}/profile`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({ resume_url: resumeUrl }),
+    body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error('Failed to update resume');
+  if (!response.ok) throw new Error('Failed to update profile');
   return response.json();
 };

@@ -25,6 +25,7 @@ const Header = () => {
     { id: 'cyberpunk', color: '#f0f', name: 'Cyber' },
     { id: 'forest', color: '#4ade80', name: 'Forest' },
     { id: 'oceanic', color: '#38bdf8', name: 'Ocean' },
+    { id: 'custom', color: 'conic-gradient(red, yellow, green, blue, magenta, red)', name: 'Brand' },
   ];
 
   return (

@@ -7,8 +7,8 @@ import {
   createProject, 
   deleteProject, 
   fetchEnquiries, 
-  fetchResume, 
-  updateResume 
+  fetchProfile, 
+  updateProfile 
 } from '@/lib/api';
 import './admin-theme.css';
 import { LayoutDashboard, PlusCircle, FileText, MessageSquare, LogOut, Trash2, RefreshCcw, ExternalLink } from 'lucide-react';
@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [projects, setProjects] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
   const [resumeUrl, setResumeUrl] = useState('');
+  const [themeColor, setThemeColor] = useState('');
   const [loading, setLoading] = useState(true);
   
   // Project form
@@ -27,8 +28,9 @@ export default function AdminDashboard() {
   const [liveLink, setLiveLink] = useState('');
   const [githubLink, setGithubLink] = useState('');
   
-  // Resume form
+  // Profile form
   const [newResumeUrl, setNewResumeUrl] = useState('');
+  const [newThemeColor, setNewThemeColor] = useState('#b87af0');
   
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -46,15 +48,17 @@ export default function AdminDashboard() {
   const loadData = async (token: string) => {
     try {
       setLoading(true);
-      const [projData, enqData, resData] = await Promise.all([
+      const [projData, enqData, profileData] = await Promise.all([
         fetchProjects(),
         fetchEnquiries(token),
-        fetchResume()
+        fetchProfile()
       ]);
       setProjects(projData);
       setEnquiries(enqData);
-      setResumeUrl(resData.resume_url || '');
-      setNewResumeUrl(resData.resume_url || '');
+      setResumeUrl(profileData.resume_url || '');
+      setNewResumeUrl(profileData.resume_url || '');
+      setThemeColor(profileData.theme_color || '#b87af0');
+      setNewThemeColor(profileData.theme_color || '#b87af0');
     } catch (err) {
       setError('Connection to backend failed. Make sure the server is running on port 5000.');
     } finally {
@@ -104,17 +108,21 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleUpdateResume = async (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem('adminToken');
     if (!token) return;
 
     try {
-      await updateResume(newResumeUrl, token);
-      setSuccess('Resume pointer updated.');
+      await updateProfile({ resume_url: newResumeUrl, theme_color: newThemeColor }, token);
+      setSuccess('Global attributes updated.');
       setResumeUrl(newResumeUrl);
+      setThemeColor(newThemeColor);
+      
+      // Update global theme immediately for preview
+      document.documentElement.style.setProperty('--primary', newThemeColor);
     } catch (err) {
-      setError('Pointer update failed.');
+      setError('Attributes update failed.');
     }
   };
 
@@ -186,11 +194,35 @@ export default function AdminDashboard() {
                <div className="card-header">
                   <h2>Update Global Attributes</h2>
                </div>
-               <form onSubmit={handleUpdateResume} className="modular-form">
-                  <input type="text" placeholder="Resume Remote URL" value={newResumeUrl} onChange={(e) => setNewResumeUrl(e.target.value)} required />
-                  <button type="submit" className="action-btn-outline">Patch Resume</button>
+               <form onSubmit={handleUpdateProfile} className="modular-form">
+                  <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Resume Remote URL</label>
+                    <input type="text" placeholder="URL" value={newResumeUrl} onChange={(e) => setNewResumeUrl(e.target.value)} required />
+                  </div>
+                  
+                  <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Global Theme Color</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <input 
+                        type="color" 
+                        value={newThemeColor} 
+                        onChange={(e) => setNewThemeColor(e.target.value)}
+                        style={{ width: '50px', height: '40px', padding: '0', cursor: 'pointer', border: '1px solid var(--gray-op)', borderRadius: '4px', background: 'transparent' }}
+                      />
+                      <input 
+                        type="text" 
+                        value={newThemeColor} 
+                        onChange={(e) => setNewThemeColor(e.target.value)} 
+                        style={{ flex: 1 }}
+                        placeholder="#hexcode"
+                      />
+                    </div>
+                  </div>
+
+                  <button type="submit" className="action-btn-outline" style={{ marginTop: '0.5rem' }}>Update Attributes</button>
                </form>
-               {resumeUrl && <p className="attribute-info">Active Ptr: <a href={resumeUrl} target="_blank" rel="noreferrer">Open</a></p>}
+               {resumeUrl && <p className="attribute-info" style={{ marginTop: '1rem' }}>Active Resume Ptr: <a href={resumeUrl} target="_blank" rel="noreferrer">Open</a></p>}
+               {themeColor && <p className="attribute-info">Active Theme: <span style={{ color: themeColor }}>{themeColor}</span></p>}
             </section>
           </div>
 
@@ -202,7 +234,7 @@ export default function AdminDashboard() {
               </div>
               <div className="entity-list">
                 {projects.map((p: any) => (
-                  <div key={p.id} className="entity-item glass">
+                  <div key={p._id || p.id} className="entity-item glass">
                     <div className="entity-info">
                        <strong>{p.title}</strong>
                        <div className="entity-meta">
@@ -210,7 +242,7 @@ export default function AdminDashboard() {
                           <span className="meta-tag">{p.techs?.length || 0} TECHS</span>
                        </div>
                     </div>
-                    <button onClick={() => handleDeleteProject(p.id)} className="icon-btn-danger">
+                    <button onClick={() => handleDeleteProject(p._id || p.id)} className="icon-btn-danger">
                        <Trash2 size={16} />
                     </button>
                   </div>
@@ -224,10 +256,10 @@ export default function AdminDashboard() {
               </div>
               <div className="enquiry-stack">
                 {enquiries.length === 0 ? <p className="empty-msg">No messages detected.</p> : enquiries.map((enq: any) => (
-                  <div key={enq.id} className="transmission-item glass">
+                  <div key={enq._id || enq.id} className="transmission-item glass">
                     <div className="trans-head">
                        <strong>{enq.name}</strong>
-                       <time>{new Date(enq.created_at).toLocaleDateString()}</time>
+                       <time>{new Date(enq.createdAt || enq.created_at || new Date()).toLocaleDateString()}</time>
                     </div>
                     <code className="trans-email">{enq.email}</code>
                     <p className="trans-body">{enq.message}</p>
