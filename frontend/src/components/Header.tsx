@@ -61,24 +61,22 @@ const Header = () => {
                          if (t.id !== 'custom') setShowThemes(false);
                        }}
                        className={`theme-opt ${theme === t.id ? 'active' : ''}`}
+                       style={{ position: 'relative' }}
                      >
-                       {t.id === 'custom' ? (
-                         <div className="theme-color-dot" style={{ background: t.color, position: 'relative', overflow: 'hidden' }}>
-                           <input 
-                             type="color" 
-                             value={customColor || '#b87af0'}
-                             onChange={(e) => {
-                               setCustomColor(e.target.value);
-                               setTheme('custom');
-                             }}
-                             onClick={(e) => e.stopPropagation()}
-                             style={{ position: 'absolute', top: -5, left: -5, width: 30, height: 30, opacity: 0, cursor: 'pointer' }}
-                             title="Pick custom color"
-                           />
-                         </div>
-                       ) : (
-                         <span className="theme-color-dot" style={{background: t.color}}></span>
+                       {t.id === 'custom' && (
+                         <input 
+                           type="color" 
+                           value={customColor || '#b87af0'}
+                           onChange={(e) => {
+                             setCustomColor(e.target.value);
+                             setTheme('custom');
+                           }}
+                           onClick={(e) => e.stopPropagation()}
+                           style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }}
+                           title="Pick custom color"
+                         />
                        )}
+                       <span className="theme-color-dot" style={{background: t.color}}></span>
                        {t.name}
                      </button>
                    ))}
@@ -121,25 +119,22 @@ const Header = () => {
                          if (t.id !== 'custom') setIsOpen(false);
                        }}
                        className={`mobile-theme-opt ${theme === t.id ? 'active' : ''}`}
-                       style={{ borderColor: theme === t.id ? t.color : 'transparent' }}
+                       style={{ borderColor: theme === t.id ? t.color : 'transparent', position: 'relative' }}
                      >
-                       {t.id === 'custom' ? (
-                         <div className="theme-color-dot" style={{ background: t.color, position: 'relative', overflow: 'hidden' }}>
-                           <input 
-                             type="color" 
-                             value={customColor || '#b87af0'}
-                             onChange={(e) => {
-                               setCustomColor(e.target.value);
-                               setTheme('custom');
-                             }}
-                             onClick={(e) => e.stopPropagation()}
-                             style={{ position: 'absolute', top: -5, left: -5, width: 30, height: 30, opacity: 0, cursor: 'pointer' }}
-                             title="Pick custom color"
-                           />
-                         </div>
-                       ) : (
-                         <span className="theme-color-dot" style={{background: t.color}}></span>
+                       {t.id === 'custom' && (
+                         <input 
+                           type="color" 
+                           value={customColor || '#b87af0'}
+                           onChange={(e) => {
+                             setCustomColor(e.target.value);
+                             setTheme('custom');
+                           }}
+                           onClick={(e) => e.stopPropagation()}
+                           style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }}
+                           title="Pick custom color"
+                         />
                        )}
+                       <span className="theme-color-dot" style={{background: t.color}}></span>
                      </button>
                    ))}
                  </div>

@@ -5,7 +5,7 @@ import Hero from '@/components/Hero';
 import ProjectsList from '@/components/ProjectsList';
 import { useState, useEffect } from 'react';
 import { submitEnquiry, fetchProfile } from '@/lib/api';
-import { Send, Mail, Disc } from 'lucide-react';
+import { Send, Mail, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
 
@@ -47,10 +47,10 @@ export default function Home() {
   return (
     <div className="portfolio-app">
       <Header />
-      
+
       <main>
         <Hero />
-        
+
         {/* About section */}
         <section id="about" className="section container">
           <div className="section-header">
@@ -58,7 +58,7 @@ export default function Home() {
             <div className="section-line"></div>
           </div>
           <div className="about-grid">
-            <motion.div 
+            <motion.div
               className="about-text glass"
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -80,16 +80,16 @@ export default function Home() {
                 </ul>
                 <br />
                 <div className="about-btns">
-                   <a href="#contacts" className="btn btn-primary">Read more ~~{'>'}</a>
-                   {resumeUrl && (
-                      <a href={resumeUrl} target="_blank" className="btn btn-filled">
-                        CV.pdf
-                      </a>
-                   )}
+                  <a href="#contacts" className="btn btn-primary">Read more ~~{'>'}</a>
+                  {resumeUrl && (
+                    <a href={resumeUrl} target="_blank" className="btn btn-filled">
+                      CV.pdf
+                    </a>
+                  )}
                 </div>
               </div>
             </motion.div>
-            <motion.div 
+            <motion.div
               className="about-visuals"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -107,7 +107,7 @@ export default function Home() {
 
         {/* Contacts section */}
         <section id="contacts" className="section container">
-           <div className="section-header">
+          <div className="section-header">
             <h2 className="section-title"><span className="section-hash">#</span>contacts</h2>
             <div className="section-line"></div>
           </div>
@@ -116,29 +116,29 @@ export default function Home() {
               <p className="contact-msg-top">
                 I’m always open to discussing new projects, creative ideas or freelance opportunities to be part of your visions.
               </p>
-              
+
               <div className="social-box glass">
                 <h3>Message me here</h3>
                 <div className="social-links">
-                   <div className="social-item">
-                     <Disc size={18} className="social-icon" />
-                     <span>!Vinish</span>
-                   </div>
-                   <div className="social-item">
-                     <Mail size={18} className="social-icon" />
-                     <span>vinish@example.com</span>
-                   </div>
+                  <div className="social-item">
+                    <Phone size={18} className="social-icon" />
+                    <a href="tel:+918107593443" style={{ color: 'inherit', textDecoration: 'none' }} className="hover-link">+91 8107593443</a>
+                  </div>
+                  <div className="social-item">
+                    <Mail size={18} className="social-icon" />
+                    <a href="mailto:vinishpurohit3110@gmail.com" style={{ color: 'inherit', textDecoration: 'none' }} className="hover-link">vinishpurohit3110@gmail.com</a>
+                  </div>
                 </div>
               </div>
 
               <div style={{ marginTop: '2rem' }}>
-                <div 
-                  className="badge-base LI-profile-badge" 
-                  data-locale="en_US" 
-                  data-size="medium" 
-                  data-theme={theme === 'light' ? 'light' : 'dark'} 
-                  data-type="VERTICAL" 
-                  data-vanity="vinishpurohit" 
+                <div
+                  className="badge-base LI-profile-badge"
+                  data-locale="en_US"
+                  data-size="medium"
+                  data-theme={theme === 'light' ? 'light' : 'dark'}
+                  data-type="VERTICAL"
+                  data-vanity="vinishpurohit"
                   data-version="v1"
                 >
                   <a className="badge-base__link LI-simple-link" href="https://in.linkedin.com/in/vinishpurohit?trk=profile-badge">Vinish Purohit</a>
@@ -151,41 +151,41 @@ export default function Home() {
                 <div className="input-group">
                   <div className="input-wrapper">
                     <label>Name</label>
-                    <input 
-                      type="text" 
-                      name="name" 
+                    <input
+                      type="text"
+                      name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      required 
+                      required
                     />
                   </div>
                   <div className="input-wrapper">
                     <label>Email</label>
-                    <input 
-                      type="email" 
-                      name="email" 
+                    <input
+                      type="email"
+                      name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      required 
+                      required
                     />
                   </div>
                 </div>
                 <div className="input-wrapper">
                   <label>Message</label>
-                  <textarea 
-                    name="message" 
+                  <textarea
+                    name="message"
                     value={formData.message}
                     onChange={handleChange}
-                    required 
+                    required
                   ></textarea>
                 </div>
                 <button type="submit" disabled={status.type === 'loading'} className="btn btn-filled">
                   {status.type === 'loading' ? 'Sending...' : 'Send Message'} <Send size={16} />
                 </button>
-                
+
                 <AnimatePresence>
                   {status.message && (
-                    <motion.p 
+                    <motion.p
                       className={`status-msg ${status.type}`}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -211,7 +211,7 @@ export default function Home() {
             <div className="footer-socials">
               <h3>Media</h3>
               <div className="footer-icons">
-                 {/* Icons */}
+                {/* Icons */}
               </div>
             </div>
           </div>
