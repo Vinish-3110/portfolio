@@ -9,7 +9,7 @@ import { useTheme } from './ThemeProvider';
 const Header = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, customColor, setCustomColor } = useTheme();
   const [showThemes, setShowThemes] = useState(false);
 
   const links = [
@@ -56,10 +56,29 @@ const Header = () => {
                    {themes.map(t => (
                      <button 
                        key={t.id} 
-                       onClick={() => {setTheme(t.id); setShowThemes(false);}}
+                       onClick={() => {
+                         setTheme(t.id);
+                         if (t.id !== 'custom') setShowThemes(false);
+                       }}
                        className={`theme-opt ${theme === t.id ? 'active' : ''}`}
                      >
-                       <span className="theme-color-dot" style={{background: t.color}}></span>
+                       {t.id === 'custom' ? (
+                         <div className="theme-color-dot" style={{ background: t.color, position: 'relative', overflow: 'hidden' }}>
+                           <input 
+                             type="color" 
+                             value={customColor || '#b87af0'}
+                             onChange={(e) => {
+                               setCustomColor(e.target.value);
+                               setTheme('custom');
+                             }}
+                             onClick={(e) => e.stopPropagation()}
+                             style={{ position: 'absolute', top: -5, left: -5, width: 30, height: 30, opacity: 0, cursor: 'pointer' }}
+                             title="Pick custom color"
+                           />
+                         </div>
+                       ) : (
+                         <span className="theme-color-dot" style={{background: t.color}}></span>
+                       )}
                        {t.name}
                      </button>
                    ))}
@@ -97,11 +116,30 @@ const Header = () => {
                    {themes.map(t => (
                      <button 
                        key={t.id} 
-                       onClick={() => {setTheme(t.id); setIsOpen(false);}}
+                       onClick={() => {
+                         setTheme(t.id);
+                         if (t.id !== 'custom') setIsOpen(false);
+                       }}
                        className={`mobile-theme-opt ${theme === t.id ? 'active' : ''}`}
                        style={{ borderColor: theme === t.id ? t.color : 'transparent' }}
                      >
-                       <span className="theme-color-dot" style={{background: t.color}}></span>
+                       {t.id === 'custom' ? (
+                         <div className="theme-color-dot" style={{ background: t.color, position: 'relative', overflow: 'hidden' }}>
+                           <input 
+                             type="color" 
+                             value={customColor || '#b87af0'}
+                             onChange={(e) => {
+                               setCustomColor(e.target.value);
+                               setTheme('custom');
+                             }}
+                             onClick={(e) => e.stopPropagation()}
+                             style={{ position: 'absolute', top: -5, left: -5, width: 30, height: 30, opacity: 0, cursor: 'pointer' }}
+                             title="Pick custom color"
+                           />
+                         </div>
+                       ) : (
+                         <span className="theme-color-dot" style={{background: t.color}}></span>
+                       )}
                      </button>
                    ))}
                  </div>

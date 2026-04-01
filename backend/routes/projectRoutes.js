@@ -4,6 +4,17 @@ const Project = require('../models/Project');
 const asyncHandler = require('express-async-handler');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename(req, file, cb) {
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+const upload = multer({ storage });
 
 // Helper to delete an image file by URL
 const deleteOldImage = (imageUrl) => {
@@ -74,28 +85,38 @@ router.get('/:id', asyncHandler(async (req, res) => {
 
 // @desc    Update a project
 // @route   PUT /api/projects/:id
-router.put('/:id', asyncHandler(async (req, res) => {
-  const { title, description, techs, live_link, github_link, is_featured, image } = req.body;
+router.put('/:id', upload.single('image'), asyncHandler(async (req, res) => {
+  let { title, description, techs, live_link, github_link, is_featured } = req.body;
   const project = await Project.findById(req.params.id);
 
   if (project) {
     project.title = title || project.title;
-    project.description = description || project.description;
-    project.techs = techs || project.techs;
+    
+    // Parse description and techs if they are sent as strings
+    if (description) {
+      try { project.description = typeof description === 'string' ? JSON.parse(description) : description; } 
+      catch (e) { project.description = description; }
+    }
+    if (techs) {
+      try { project.techs = typeof techs === 'string' ? JSON.parse(techs) : techs; } 
+      catch (e) { project.techs = techs; }
+    }
+    
     if (project.links) {
       project.links.live = live_link !== undefined ? live_link : project.links.live;
       project.links.github = github_link !== undefined ? github_link : project.links.github;
     } else {
       project.links = { live: live_link, github: github_link };
     }
-    project.isFeatured = is_featured !== undefined ? is_featured : project.isFeatured;
+    project.isFeatured = is_featured !== undefined ? (is_featured === 'true' || is_featured === true) : project.isFeatured;
     
-    // Clean up old image if a new one is provided and it differs
-    if (image !== undefined && image !== project.image) {
+    // If a new file was uploaded via multipart, use its URL
+    if (req.file) {
+      const newImageUrl = `/uploads/${req.file.filename}`;
       if (project.image) {
         deleteOldImage(project.image);
       }
-      project.image = image;
+      project.image = newImageUrl;
     }
 
     const updatedProject = await project.save();

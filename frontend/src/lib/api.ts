@@ -26,13 +26,18 @@ export const fetchProject = async (id: string) => {
 };
 
 export const updateProject = async (id: string, project: any, token: string) => {
+  const isFormData = project instanceof FormData;
+  const headers: any = {
+    'Authorization': `Bearer ${token}`
+  };
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const response = await fetch(`${API_URL}/projects/${id}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(project),
+    headers,
+    body: isFormData ? project : JSON.stringify(project),
   });
   if (!response.ok) throw new Error('Failed to update project');
   return response.json();

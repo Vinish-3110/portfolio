@@ -7,8 +7,10 @@ import { useState, useEffect } from 'react';
 import { submitEnquiry, fetchProfile } from '@/lib/api';
 import { Send, Mail, Disc } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '@/components/ThemeProvider';
 
 export default function Home() {
+  const { theme } = useTheme();
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState({ type: '', message: '' });
   const [resumeUrl, setResumeUrl] = useState('');
@@ -69,6 +71,14 @@ export default function Home() {
                 <br />
                 <p>Transforming complex requirements into intuitive, user-friendly digital experiences is what I do best. I’m always pushing boundaries and exploring the latest in tech to build the next generation of web products.</p>
                 <br />
+                <ul style={{ listStyleType: 'square', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', color: 'var(--text-dim)', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                  <li>Designed and implemented production-grade RESTful APIs and backend services.</li>
+                  <li>Built responsive, modular front-end applications and integrated them with backend services.</li>
+                  <li>Architected deployment-ready solutions using containerization and CI/CD practices.</li>
+                  <li>Enhanced performance and maintainability through modular architecture, automated testing, and code reviews.</li>
+                  <li>Collaborated with product stakeholders to translate requirements into prioritized deliverables.</li>
+                </ul>
+                <br />
                 <div className="about-btns">
                    <a href="#contacts" className="btn btn-primary">Read more ~~{'>'}</a>
                    {resumeUrl && (
@@ -118,6 +128,20 @@ export default function Home() {
                      <Mail size={18} className="social-icon" />
                      <span>vinish@example.com</span>
                    </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '2rem' }}>
+                <div 
+                  className="badge-base LI-profile-badge" 
+                  data-locale="en_US" 
+                  data-size="medium" 
+                  data-theme={theme === 'light' ? 'light' : 'dark'} 
+                  data-type="VERTICAL" 
+                  data-vanity="vinishpurohit" 
+                  data-version="v1"
+                >
+                  <a className="badge-base__link LI-simple-link" href="https://in.linkedin.com/in/vinishpurohit?trk=profile-badge">Vinish Purohit</a>
                 </div>
               </div>
             </div>

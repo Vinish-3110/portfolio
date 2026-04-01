@@ -57,24 +57,20 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
       setError('');
       setSuccess('');
       
-      let imageUrl = currentImageUrl;
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', JSON.stringify(description.split('\n').map(s => s.trim()).filter(Boolean)));
+      formData.append('techs', JSON.stringify(techs.split(',').map(s => s.trim()).filter(Boolean)));
+      formData.append('live_link', liveLink);
+      formData.append('github_link', githubLink);
+      formData.append('is_featured', String(isFeatured));
+      
       if (projectImage) {
-        imageUrl = await uploadFile(projectImage);
-        setCurrentImageUrl(imageUrl);
+        formData.append('image', projectImage);
       }
 
-      const updatedProject = {
-        title,
-        description: description.split('\n').map(s => s.trim()).filter(Boolean),
-        techs: techs.split(',').map(s => s.trim()).filter(Boolean),
-        live_link: liveLink,
-        github_link: githubLink,
-        is_featured: isFeatured,
-        image: imageUrl
-      };
-
-      console.log('Update payload:', updatedProject);
-      const res = await updateProject(unwrappedParams.id, updatedProject, token);
+      console.log('Update payload:', formData);
+      const res = await updateProject(unwrappedParams.id, formData, token);
       console.log('Update response:', res);
       setSuccess('Entity updated successfully. Redirecting...');
       setProjectImage(null);
@@ -151,7 +147,11 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                {currentImageUrl && (
                   <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Current Image</label>
-                    <img src={currentImageUrl} alt="Preview" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                    <img 
+                      src={currentImageUrl.startsWith('http') ? currentImageUrl : `${(process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-d559.onrender.com/api').replace('/api', '')}${currentImageUrl}`} 
+                      alt="Preview" 
+                      style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }} 
+                    />
                   </div>
                )}
             </div>

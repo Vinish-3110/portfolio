@@ -9,6 +9,13 @@ const ProjectsList = () => {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const getImageUrl = (url: string) => {
+        if (!url) return '';
+        if (url.startsWith('http')) return url;
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-d559.onrender.com/api';
+        return `${API_URL.replace('/api', '')}${url}`;
+    };
+
     useEffect(() => {
         fetchProjects()
             .then(data => setProjects(data))
@@ -46,7 +53,7 @@ const ProjectsList = () => {
                         >
                             <div className="project-preview">
                                 {project.image ? (
-                                    <img src={project.image} alt={project.title} className="project-img" />
+                                    <img src={getImageUrl(project.image)} alt={project.title} className="project-img" />
                                 ) : (
                                     <div className="project-no-img">Modular UI Component</div>
                                 )}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import Script from "next/script";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -29,6 +30,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
         </ThemeProvider>
+        <Script src="https://platform.linkedin.com/badges/js/profile.js" strategy="lazyOnload" type="text/javascript" />
       </body>
     </html>
   );

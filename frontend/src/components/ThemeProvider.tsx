@@ -8,13 +8,15 @@ interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
+  customColor: string;
+  setCustomColor: (color: string) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setTheme] = useState<Theme>('dark');
-  const [customColor, setCustomColor] = useState<string>('#b87af0');
+  const [customColor, setCustomColorState] = useState<string>('#b87af0');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme;
@@ -22,7 +24,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     import('@/lib/api').then(({ fetchProfile }) => {
       fetchProfile().then(data => {
         if (data.theme_color) {
-          setCustomColor(data.theme_color);
+          setCustomColorState(data.theme_color);
           
           if (!savedTheme || savedTheme === 'custom') {
             setTheme('custom');
@@ -66,8 +68,16 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     changeTheme(themes[nextIndex]);
   };
 
+  const setCustomColor = (color: string) => {
+    setCustomColorState(color);
+    if (theme === 'custom') {
+      document.documentElement.style.setProperty('--primary', color);
+      document.documentElement.style.setProperty('--primary-op', color + '1A');
+    }
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: changeTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme: changeTheme, toggleTheme, customColor, setCustomColor }}>
       {children}
     </ThemeContext.Provider>
   );
