@@ -120,18 +120,18 @@ export default function Home() {
               <div className="social-box glass">
                 <h3>Message me here</h3>
                 <div className="social-links">
-                  <div className="social-item">
-                    <Phone size={18} className="social-icon" />
-                    <a href="tel:+918107593443" style={{ color: 'inherit', textDecoration: 'none' }} className="hover-link">+91 8107593443</a>
+                  <div className="social-item" style={{ flexWrap: 'wrap' }}>
+                    <Phone size={18} className="social-icon" style={{ flexShrink: 0 }} />
+                    <a href="tel:+918107593443" style={{ color: 'inherit', textDecoration: 'none', wordBreak: 'break-word' }} className="hover-link">+91 8107593443</a>
                   </div>
-                  <div className="social-item">
-                    <Mail size={18} className="social-icon" />
-                    <a href="mailto:vinishpurohit3110@gmail.com" style={{ color: 'inherit', textDecoration: 'none' }} className="hover-link">vinishpurohit3110@gmail.com</a>
+                  <div className="social-item" style={{ flexWrap: 'wrap' }}>
+                    <Mail size={18} className="social-icon" style={{ flexShrink: 0 }} />
+                    <a href="mailto:vinishpurohit3110@gmail.com" style={{ color: 'inherit', textDecoration: 'none', wordBreak: 'break-all' }} className="hover-link">vinishpurohit3110@gmail.com</a>
                   </div>
                 </div>
               </div>
 
-              <div style={{ marginTop: '2rem' }}>
+              <div style={{ marginTop: '2rem', maxWidth: '100%', overflowX: 'hidden' }}>
                 <div
                   className="badge-base LI-profile-badge"
                   data-locale="en_US"

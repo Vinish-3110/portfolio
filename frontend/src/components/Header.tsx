@@ -71,6 +71,10 @@ const Header = () => {
                              setCustomColor(e.target.value);
                              setTheme('custom');
                            }}
+                           onInput={(e) => {
+                             setCustomColor((e.target as HTMLInputElement).value);
+                             setTheme('custom');
+                           }}
                            onClick={(e) => e.stopPropagation()}
                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }}
                            title="Pick custom color"
@@ -127,6 +131,10 @@ const Header = () => {
                            value={customColor || '#b87af0'}
                            onChange={(e) => {
                              setCustomColor(e.target.value);
+                             setTheme('custom');
+                           }}
+                           onInput={(e) => {
+                             setCustomColor((e.target as HTMLInputElement).value);
                              setTheme('custom');
                            }}
                            onClick={(e) => e.stopPropagation()}
