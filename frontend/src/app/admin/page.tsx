@@ -121,6 +121,7 @@ export default function AdminDashboard() {
       
       // Update global theme immediately for preview
       document.documentElement.style.setProperty('--primary', newThemeColor);
+      document.documentElement.style.setProperty('--primary-op', newThemeColor + '1A');
     } catch (err) {
       setError('Attributes update failed.');
     }

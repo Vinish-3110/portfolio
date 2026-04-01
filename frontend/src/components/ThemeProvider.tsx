@@ -30,6 +30,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
           setCustomColor(data.theme_color);
           if (savedTheme === 'custom' || (!savedTheme && data.theme_color)) {
             document.documentElement.style.setProperty('--primary', data.theme_color);
+            document.documentElement.style.setProperty('--primary-op', data.theme_color + '1A');
           }
         }
       }).catch(() => console.error('Failed to fetch theme profile'));
@@ -42,8 +43,10 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     document.documentElement.setAttribute('data-theme', newTheme);
     if (newTheme === 'custom') {
       document.documentElement.style.setProperty('--primary', customColor);
+      document.documentElement.style.setProperty('--primary-op', customColor + '1A');
     } else {
       document.documentElement.style.removeProperty('--primary');
+      document.documentElement.style.removeProperty('--primary-op');
     }
   };
 

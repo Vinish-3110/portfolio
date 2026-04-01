@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import ProjectsList from '@/components/ProjectsList';
 import { useState, useEffect } from 'react';
-import { submitEnquiry, fetchResume } from '@/lib/api';
+import { submitEnquiry, fetchProfile } from '@/lib/api';
 import { Send, Mail, Disc } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -16,7 +16,7 @@ export default function Home() {
   useEffect(() => {
     const loadResume = async () => {
       try {
-        const data = await fetchResume();
+        const data = await fetchProfile();
         setResumeUrl(data.resume_url);
       } catch (err) {
         console.error('Failed to load resume');
