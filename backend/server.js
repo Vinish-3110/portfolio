@@ -37,6 +37,10 @@ app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/enquiries', require('./routes/enquiryRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/profile', require('./routes/profileRoutes'));
+app.use('/api/upload', require('./routes/uploadRoutes'));
+
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/api/health', (req, res) => {
   res.json({ message: 'Server is running', database: 'MongoDB' });

@@ -18,22 +18,31 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
 
-    // Fetch global config
     import('@/lib/api').then(({ fetchProfile }) => {
       fetchProfile().then(data => {
         if (data.theme_color) {
           setCustomColor(data.theme_color);
-          if (savedTheme === 'custom' || (!savedTheme && data.theme_color)) {
+          
+          if (!savedTheme || savedTheme === 'custom') {
+            setTheme('custom');
+            document.documentElement.setAttribute('data-theme', 'custom');
             document.documentElement.style.setProperty('--primary', data.theme_color);
             document.documentElement.style.setProperty('--primary-op', data.theme_color + '1A');
+          } else {
+            setTheme(savedTheme);
+            document.documentElement.setAttribute('data-theme', savedTheme);
           }
+        } else if (savedTheme) {
+          setTheme(savedTheme);
+          document.documentElement.setAttribute('data-theme', savedTheme);
         }
-      }).catch(() => console.error('Failed to fetch theme profile'));
+      }).catch(() => {
+        if (savedTheme) {
+          setTheme(savedTheme);
+          document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+      });
     });
   }, []);
 

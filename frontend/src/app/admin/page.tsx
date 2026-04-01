@@ -8,7 +8,8 @@ import {
   deleteProject, 
   fetchEnquiries, 
   fetchProfile, 
-  updateProfile 
+  updateProfile,
+  uploadFile
 } from '@/lib/api';
 import './admin-theme.css';
 import { LayoutDashboard, PlusCircle, FileText, MessageSquare, LogOut, Trash2, RefreshCcw, ExternalLink } from 'lucide-react';
@@ -27,9 +28,10 @@ export default function AdminDashboard() {
   const [techs, setTechs] = useState('');
   const [liveLink, setLiveLink] = useState('');
   const [githubLink, setGithubLink] = useState('');
+  const [projectImage, setProjectImage] = useState<File | null>(null);
   
   // Profile form
-  const [newResumeUrl, setNewResumeUrl] = useState('');
+  const [newResumeFile, setNewResumeFile] = useState<File | null>(null);
   const [newThemeColor, setNewThemeColor] = useState('#b87af0');
   
   const [error, setError] = useState('');
@@ -56,7 +58,6 @@ export default function AdminDashboard() {
       setProjects(projData);
       setEnquiries(enqData);
       setResumeUrl(profileData.resume_url || '');
-      setNewResumeUrl(profileData.resume_url || '');
       setThemeColor(profileData.theme_color || '#b87af0');
       setNewThemeColor(profileData.theme_color || '#b87af0');
     } catch (err) {
@@ -72,13 +73,19 @@ export default function AdminDashboard() {
     if (!token) return;
 
     try {
+      let imageUrl = '';
+      if (projectImage) {
+        imageUrl = await uploadFile(projectImage);
+      }
+
       const newProject = {
         title,
         description: description.split('\n').map(s => s.trim()).filter(Boolean),
         techs: techs.split(',').map(s => s.trim()).filter(Boolean),
         live_link: liveLink,
         github_link: githubLink,
-        is_featured: false
+        is_featured: false,
+        image: imageUrl
       };
 
       await createProject(newProject, token);
@@ -88,6 +95,7 @@ export default function AdminDashboard() {
       setTechs('');
       setLiveLink('');
       setGithubLink('');
+      setProjectImage(null);
       loadData(token);
     } catch (err) {
       setError('Primary shard write failed.');
@@ -114,9 +122,14 @@ export default function AdminDashboard() {
     if (!token) return;
 
     try {
-      await updateProfile({ resume_url: newResumeUrl, theme_color: newThemeColor }, token);
+      let uploadedResumeUrl = resumeUrl;
+      if (newResumeFile) {
+        uploadedResumeUrl = await uploadFile(newResumeFile);
+      }
+
+      await updateProfile({ resume_url: uploadedResumeUrl, theme_color: newThemeColor }, token);
       setSuccess('Global attributes updated.');
-      setResumeUrl(newResumeUrl);
+      setResumeUrl(uploadedResumeUrl);
       setThemeColor(newThemeColor);
       
       // Update global theme immediately for preview
@@ -187,6 +200,10 @@ export default function AdminDashboard() {
                   <input type="text" placeholder="Live Domain" value={liveLink} onChange={(e) => setLiveLink(e.target.value)} />
                   <input type="text" placeholder="Source Ctrl" value={githubLink} onChange={(e) => setGithubLink(e.target.value)} />
                 </div>
+                <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                   <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Project Image File</label>
+                   <input type="file" onChange={(e) => e.target.files && setProjectImage(e.target.files[0])} />
+                </div>
                 <button type="submit" className="action-btn-filled">Commit to DB</button>
               </form>
             </section>
@@ -197,8 +214,8 @@ export default function AdminDashboard() {
                </div>
                <form onSubmit={handleUpdateProfile} className="modular-form">
                   <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Resume Remote URL</label>
-                    <input type="text" placeholder="URL" value={newResumeUrl} onChange={(e) => setNewResumeUrl(e.target.value)} required />
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Resume File (PDF/Doc)</label>
+                    <input type="file" onChange={(e) => e.target.files && setNewResumeFile(e.target.files[0])} />
                   </div>
                   
                   <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -243,9 +260,14 @@ export default function AdminDashboard() {
                           <span className="meta-tag">{p.techs?.length || 0} TECHS</span>
                        </div>
                     </div>
-                    <button onClick={() => handleDeleteProject(p._id || p.id)} className="icon-btn-danger">
-                       <Trash2 size={16} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <a href={`/admin/projects/${p._id || p.id}`} className="icon-btn-edit" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '0.5rem', borderRadius: '4px', display: 'flex', alignItems: 'center' }}>
+                         Edit
+                      </a>
+                      <button onClick={() => handleDeleteProject(p._id || p.id)} className="icon-btn-danger">
+                         <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

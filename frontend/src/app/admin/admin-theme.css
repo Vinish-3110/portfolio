@@ -213,3 +213,105 @@
   .admin-sidebar { display: none; }
   .admin-main-content { margin-left: 0; }
 }
+
+/* Login Page Styles */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: hsl(218, 12%, 18%);
+  color: #fff;
+  font-family: 'Fira Code', monospace;
+}
+
+.login-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3rem;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.login-card h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--primary, #00f0ff);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.form-group input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.8rem;
+  color: #fff;
+  border-radius: 8px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+  border-color: var(--primary, #00f0ff);
+}
+
+.login-button {
+  width: 100%;
+  background: var(--primary, #00f0ff);
+  color: #000;
+  border: none;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 240, 255, 0.3);
+}
+
+.error-message {
+  color: #ff5555;
+  background: rgba(255, 85, 85, 0.1);
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  border: 1px solid rgba(255, 85, 85, 0.3);
+}
+
+/* Alert Boxes */
+.alert-box {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+.alert-box.success {
+  background: rgba(80, 250, 123, 0.1);
+  color: #50fa7b;
+  border: 1px solid rgba(80, 250, 123, 0.3);
+}
+.alert-box.error {
+  background: rgba(255, 85, 85, 0.1);
+  color: #ff5555;
+  border: 1px solid rgba(255, 85, 85, 0.3);
+}

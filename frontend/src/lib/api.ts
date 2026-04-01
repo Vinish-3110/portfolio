@@ -19,6 +19,25 @@ export const createProject = async (project: any, token: string) => {
   return response.json();
 };
 
+export const fetchProject = async (id: string) => {
+  const response = await fetch(`${API_URL}/projects/${id}`);
+  if (!response.ok) throw new Error('Failed to fetch project');
+  return response.json();
+};
+
+export const updateProject = async (id: string, project: any, token: string) => {
+  const response = await fetch(`${API_URL}/projects/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(project),
+  });
+  if (!response.ok) throw new Error('Failed to update project');
+  return response.json();
+};
+
 export const deleteProject = async (id: number, token: string) => {
   const response = await fetch(`${API_URL}/projects/${id}`, {
     method: 'DELETE',
@@ -83,4 +102,18 @@ export const updateProfile = async (data: any, token: string) => {
   });
   if (!response.ok) throw new Error('Failed to update profile');
   return response.json();
+};
+
+export const uploadFile = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const response = await fetch(`${API_URL}/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!response.ok) throw new Error('Failed to upload file');
+  const data = await response.json();
+  const baseUrl = API_URL.replace('/api', '');
+  return `${baseUrl}${data.url}`;
 };
