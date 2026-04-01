@@ -2,6 +2,23 @@ const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project');
 const asyncHandler = require('express-async-handler');
+const fs = require('fs');
+const path = require('path');
+
+// Helper to delete an image file by URL
+const deleteOldImage = (imageUrl) => {
+  if (imageUrl && imageUrl.includes('/uploads/')) {
+    try {
+      const filename = imageUrl.split('/uploads/')[1];
+      const filePath = path.join(__dirname, '../uploads', filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    } catch (err) {
+      console.error('Failed to delete old image file:', err);
+    }
+  }
+};
 
 // @desc    Get all projects
 // @route   GET /api/projects
@@ -34,6 +51,9 @@ router.post('/', asyncHandler(async (req, res) => {
 router.delete('/:id', asyncHandler(async (req, res) => {
   const project = await Project.findById(req.params.id);
   if (project) {
+    if (project.image) {
+      deleteOldImage(project.image);
+    }
     await project.deleteOne();
     res.json({ message: 'Project removed' });
   } else {
@@ -69,7 +89,14 @@ router.put('/:id', asyncHandler(async (req, res) => {
       project.links = { live: live_link, github: github_link };
     }
     project.isFeatured = is_featured !== undefined ? is_featured : project.isFeatured;
-    if (image !== undefined) project.image = image;
+    
+    // Clean up old image if a new one is provided and it differs
+    if (image !== undefined && image !== project.image) {
+      if (project.image) {
+        deleteOldImage(project.image);
+      }
+      project.image = image;
+    }
 
     const updatedProject = await project.save();
     res.json(updatedProject);
