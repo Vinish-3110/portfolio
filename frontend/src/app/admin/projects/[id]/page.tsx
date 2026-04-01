@@ -73,10 +73,14 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
         image: imageUrl
       };
 
-      await updateProject(unwrappedParams.id, updatedProject, token);
-      setSuccess('Entity updated successfully.');
+      console.log('Update payload:', updatedProject);
+      const res = await updateProject(unwrappedParams.id, updatedProject, token);
+      console.log('Update response:', res);
+      setSuccess('Entity updated successfully. Redirecting...');
       setProjectImage(null);
+      setTimeout(() => router.push('/admin'), 1500);
     } catch (err) {
+      console.error('Update failed:', err);
       setError('Failed to rewrite entity attributes.');
     } finally {
       setSaving(false);
@@ -152,7 +156,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                )}
             </div>
 
-            <button type="submit" disabled={saving} className="action-btn-filled" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+            <button type="button" disabled={saving} onClick={handleUpdate} className="action-btn-filled" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
                {saving ? 'Rewriting...' : 'Rewrite Configuration'} <Save size={18} />
             </button>
           </form>
