@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Palette } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme } from './ThemeProvider';
+import { Theme, useTheme } from './ThemeProvider';
 
 const Header = () => {
   const pathname = usePathname();
@@ -19,7 +19,7 @@ const Header = () => {
     { name: '#contacts', label: 'contacts' },
   ];
 
-  const themes: Array<{id: any, color: string, name: string}> = [
+  const themes: Array<{ id: Theme; color: string; name: string }> = [
     { id: 'dark', color: '#abb2bf', name: 'Original' },
     { id: 'light', color: '#5C2D91', name: 'Light' },
     { id: 'cyberpunk', color: '#f0f', name: 'Cyber' },

@@ -4,14 +4,14 @@ import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import ProjectsList from '@/components/ProjectsList';
 import { useState, useEffect } from 'react';
-import { submitEnquiry, fetchProfile } from '@/lib/api';
+import { EnquiryPayload, submitEnquiry, fetchProfile } from '@/lib/api';
 import { Send, Mail, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
 
 export default function Home() {
   const { theme } = useTheme();
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [formData, setFormData] = useState<EnquiryPayload>({ name: '', email: '', message: '' });
   const [status, setStatus] = useState({ type: '', message: '' });
   const [resumeUrl, setResumeUrl] = useState('');
 
@@ -19,15 +19,15 @@ export default function Home() {
     const loadResume = async () => {
       try {
         const data = await fetchProfile();
-        setResumeUrl(data.resume_url);
-      } catch (err) {
+        setResumeUrl(data.resume_url || '');
+      } catch {
         console.error('Failed to load resume');
       }
     };
     loadResume();
   }, []);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -39,8 +39,8 @@ export default function Home() {
       setStatus({ type: 'success', message: 'Message successfully intercepted and stored!' });
       setFormData({ name: '', email: '', message: '' });
       setTimeout(() => setStatus({ type: '', message: '' }), 5000);
-    } catch (err: any) {
-      setStatus({ type: 'error', message: err.message || 'Transmission failed.' });
+    } catch (err) {
+      setStatus({ type: 'error', message: err instanceof Error ? err.message : 'Transmission failed.' });
     }
   };
 

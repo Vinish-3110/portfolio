@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'dark' | 'light' | 'cyberpunk' | 'forest' | 'oceanic' | 'custom';
+export type Theme = 'dark' | 'light' | 'cyberpunk' | 'forest' | 'oceanic' | 'custom';
 
 interface ThemeContextType {
   theme: Theme;

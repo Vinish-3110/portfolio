@@ -9,15 +9,17 @@ import {
   fetchEnquiries, 
   fetchProfile, 
   updateProfile,
-  uploadFile
+  uploadFile,
+  Enquiry,
+  Project
 } from '@/lib/api';
 import './admin-theme.css';
-import { LayoutDashboard, PlusCircle, FileText, MessageSquare, LogOut, Trash2, RefreshCcw, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, FileText, MessageSquare, LogOut, Trash2, RefreshCcw, BarChart3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminDashboard() {
-  const [projects, setProjects] = useState([]);
-  const [enquiries, setEnquiries] = useState([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [resumeUrl, setResumeUrl] = useState('');
   const [themeColor, setThemeColor] = useState('');
   const [loading, setLoading] = useState(true);
@@ -60,7 +62,7 @@ export default function AdminDashboard() {
       setResumeUrl(profileData.resume_url || '');
       setThemeColor(profileData.theme_color || '#b87af0');
       setNewThemeColor(profileData.theme_color || '#b87af0');
-    } catch (err) {
+    } catch {
       setError('Connection to backend failed. Make sure the server is running on port 5000.');
     } finally {
       setLoading(false);
@@ -97,12 +99,12 @@ export default function AdminDashboard() {
       setGithubLink('');
       setProjectImage(null);
       loadData(token);
-    } catch (err) {
+    } catch {
       setError('Primary shard write failed.');
     }
   };
 
-  const handleDeleteProject = async (id: number) => {
+  const handleDeleteProject = async (id: string | number) => {
     const token = localStorage.getItem('adminToken');
     if (!token) return;
     if (!confirm('Execute deletion protocol for this project?')) return;
@@ -111,7 +113,7 @@ export default function AdminDashboard() {
       await deleteProject(id, token);
       setSuccess('Resource deallocated.');
       loadData(token);
-    } catch (err) {
+    } catch {
       setError('Deletion aborted by system.');
     }
   };
@@ -135,7 +137,7 @@ export default function AdminDashboard() {
       // Update global theme immediately for preview
       document.documentElement.style.setProperty('--primary', newThemeColor);
       document.documentElement.style.setProperty('--primary-op', newThemeColor + '1A');
-    } catch (err) {
+    } catch {
       setError('Attributes update failed.');
     }
   };
@@ -161,6 +163,7 @@ export default function AdminDashboard() {
         </div>
         <nav className="sidebar-nav">
           <a href="#projects-mgmt" className="nav-item-link active"><PlusCircle size={18} /> Projects</a>
+          <a href="/admin/analytics" className="nav-item-link"><BarChart3 size={18} /> Analytics</a>
           <a href="#enquiries" className="nav-item-link"><MessageSquare size={18} /> Enquiries</a>
           <a href="#resume-mgmt" className="nav-item-link"><FileText size={18} /> Attributes</a>
         </nav>
@@ -251,7 +254,7 @@ export default function AdminDashboard() {
                 <h2>Active Entities</h2>
               </div>
               <div className="entity-list">
-                {projects.map((p: any) => (
+                {projects.map((p) => (
                   <div key={p._id || p.id} className="entity-item glass">
                     <div className="entity-info">
                        <strong>{p.title}</strong>
@@ -261,10 +264,10 @@ export default function AdminDashboard() {
                        </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <a href={`/admin/projects/${p._id || p.id}`} className="icon-btn-edit" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '0.5rem', borderRadius: '4px', display: 'flex', alignItems: 'center' }}>
+                      <a href={`/admin/projects/${p._id || p.id || ''}`} className="icon-btn-edit" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '0.5rem', borderRadius: '4px', display: 'flex', alignItems: 'center' }}>
                          Edit
                       </a>
-                      <button onClick={() => handleDeleteProject(p._id || p.id)} className="icon-btn-danger">
+                      <button onClick={() => handleDeleteProject(p._id || p.id || '')} className="icon-btn-danger">
                          <Trash2 size={16} />
                       </button>
                     </div>
@@ -278,7 +281,7 @@ export default function AdminDashboard() {
                 <h2>Incoming Transmissions</h2>
               </div>
               <div className="enquiry-stack">
-                {enquiries.length === 0 ? <p className="empty-msg">No messages detected.</p> : enquiries.map((enq: any) => (
+                {enquiries.length === 0 ? <p className="empty-msg">No messages detected.</p> : enquiries.map((enq) => (
                   <div key={enq._id || enq.id} className="transmission-item glass">
                     <div className="trans-head">
                        <strong>{enq.name}</strong>

@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchProjects } from '@/lib/api';
+import { Project, fetchProjects } from '@/lib/api';
+import { trackProjectView } from '@/lib/analytics';
 import { motion } from 'framer-motion';
 import { ExternalLink, Code2 } from 'lucide-react';
 
 const ProjectsList = () => {
-    const [projects, setProjects] = useState([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
+    const [viewedProjects] = useState(() => new Set<string>());
 
     const getImageUrl = (url: string) => {
         if (!url) return '';
@@ -42,7 +44,7 @@ const ProjectsList = () => {
                 </div>
             ) : (
                 <div className="projects-grid">
-                    {projects.map((project: any, index) => (
+                    {projects.map((project, index) => (
                         <motion.div 
                             className="project-card glass" 
                             key={project.id || index}
@@ -50,6 +52,12 @@ const ProjectsList = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1, duration: 0.5 }}
+                            onViewportEnter={() => {
+                                const projectId = String(project._id || project.id || project.title);
+                                if (!projectId || viewedProjects.has(projectId)) return;
+                                viewedProjects.add(projectId);
+                                trackProjectView(projectId, project.title);
+                            }}
                         >
                             <div className="project-preview">
                                 {project.image ? (

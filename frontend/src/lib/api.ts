@@ -1,12 +1,58 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-d559.onrender.com/api';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-d559.onrender.com/api';
 
-export const fetchProjects = async () => {
+export type Project = {
+  _id?: string;
+  id?: string | number;
+  title: string;
+  description: string | string[];
+  techs?: string[];
+  links?: {
+    live?: string;
+    github?: string;
+    figma?: string;
+  };
+  image?: string;
+  isFeatured?: boolean;
+};
+
+export type ProjectPayload = {
+  title: string;
+  description: string[];
+  techs: string[];
+  live_link?: string;
+  github_link?: string;
+  is_featured?: boolean;
+  image?: string;
+};
+
+export type Enquiry = {
+  _id?: string;
+  id?: string | number;
+  name: string;
+  email: string;
+  message: string;
+  createdAt?: string;
+  created_at?: string;
+};
+
+export type EnquiryPayload = {
+  name: string;
+  email: string;
+  message: string;
+};
+
+export type Profile = {
+  resume_url?: string;
+  theme_color?: string;
+};
+
+export const fetchProjects = async (): Promise<Project[]> => {
   const response = await fetch(`${API_URL}/projects`);
   if (!response.ok) throw new Error('Failed to fetch projects');
   return response.json();
 };
 
-export const createProject = async (project: any, token: string) => {
+export const createProject = async (project: ProjectPayload, token: string): Promise<Project> => {
   const response = await fetch(`${API_URL}/projects`, {
     method: 'POST',
     headers: {
@@ -19,15 +65,15 @@ export const createProject = async (project: any, token: string) => {
   return response.json();
 };
 
-export const fetchProject = async (id: string) => {
+export const fetchProject = async (id: string): Promise<Project> => {
   const response = await fetch(`${API_URL}/projects/${id}`);
   if (!response.ok) throw new Error('Failed to fetch project');
   return response.json();
 };
 
-export const updateProject = async (id: string, project: any, token: string) => {
+export const updateProject = async (id: string, project: Partial<ProjectPayload> | FormData, token: string): Promise<Project> => {
   const isFormData = project instanceof FormData;
-  const headers: any = {
+  const headers: Record<string, string> = {
     'Authorization': `Bearer ${token}`
   };
   if (!isFormData) {
@@ -43,7 +89,7 @@ export const updateProject = async (id: string, project: any, token: string) => 
   return response.json();
 };
 
-export const deleteProject = async (id: number, token: string) => {
+export const deleteProject = async (id: string | number, token: string) => {
   const response = await fetch(`${API_URL}/projects/${id}`, {
     method: 'DELETE',
     headers: {
@@ -54,7 +100,7 @@ export const deleteProject = async (id: number, token: string) => {
   return response.json();
 };
 
-export const loginAdmin = async (credentials: any) => {
+export const loginAdmin = async (credentials: { username: string; password: string }) => {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: {
@@ -67,7 +113,7 @@ export const loginAdmin = async (credentials: any) => {
 };
 
 // Enquiries
-export const submitEnquiry = async (enquiry: any) => {
+export const submitEnquiry = async (enquiry: EnquiryPayload) => {
   const response = await fetch(`${API_URL}/enquiries`, {
     method: 'POST',
     headers: {
@@ -79,7 +125,7 @@ export const submitEnquiry = async (enquiry: any) => {
   return response.json();
 };
 
-export const fetchEnquiries = async (token: string) => {
+export const fetchEnquiries = async (token: string): Promise<Enquiry[]> => {
   const response = await fetch(`${API_URL}/enquiries`, {
     headers: {
       'Authorization': `Bearer ${token}`
@@ -89,14 +135,33 @@ export const fetchEnquiries = async (token: string) => {
   return response.json();
 };
 
+export type AnalyticsStats = {
+  totalVisitors: number;
+  uniqueVisitors: number;
+  realtimeVisitors: number;
+  dailyVisitors: { date: string; count: number }[];
+  topCountries: { country: string; count: number }[];
+  topPages: { path: string; count: number }[];
+};
+
+export const fetchAnalyticsStats = async (token: string): Promise<AnalyticsStats> => {
+  const response = await fetch(`${API_URL}/admin/stats`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+  });
+  if (!response.ok) throw new Error('Failed to fetch analytics stats');
+  return response.json();
+};
+
 // Profile / Resume
-export const fetchProfile = async () => {
+export const fetchProfile = async (): Promise<Profile> => {
   const response = await fetch(`${API_URL}/profile`);
   if (!response.ok) throw new Error('Failed to fetch profile');
   return response.json(); // { resume_url: '...', theme_color: '...' }
 };
 
-export const updateProfile = async (data: any, token: string) => {
+export const updateProfile = async (data: Profile, token: string) => {
   const response = await fetch(`${API_URL}/profile`, {
     method: 'PUT',
     headers: {

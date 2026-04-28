@@ -7,6 +7,7 @@ dotenv.config();
 connectDB();
 
 const app = express();
+app.set('trust proxy', 1);
 
 const setupSwagger = require('./swagger');
 
@@ -38,6 +39,7 @@ app.use('/api/enquiries', require('./routes/enquiryRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/profile', require('./routes/profileRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
+app.use('/api', require('./routes/analyticsRoutes'));
 
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
