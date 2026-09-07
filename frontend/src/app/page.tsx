@@ -1,226 +1,70 @@
 'use client';
 
-import Header from '@/components/Header';
-import Hero from '@/components/Hero';
-import ProjectsList from '@/components/ProjectsList';
-import { useState, useEffect } from 'react';
-import { EnquiryPayload, submitEnquiry, fetchProfile } from '@/lib/api';
-import { Send, Mail, Phone } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '@/components/ThemeProvider';
+import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import ScrollProgress from '@/components/common/ScrollProgress';
+import CustomCursor from '@/components/common/CustomCursor';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import Hero from '@/components/sections/Hero';
+import About from '@/components/sections/About';
+import Skills from '@/components/sections/Skills';
+import Experience from '@/components/sections/Experience';
+import Projects from '@/components/sections/Projects';
+import Contact from '@/components/sections/Contact';
+import { fetchProfile } from '@/lib/api';
+
+// Dynamic import with ssr: false for WebGL Three.js canvas
+const HyperspeedLoader = dynamic(
+  () => import('@/components/common/HyperspeedLoader'),
+  { ssr: false }
+);
 
 export default function Home() {
-  const { theme } = useTheme();
-  const [formData, setFormData] = useState<EnquiryPayload>({ name: '', email: '', message: '' });
-  const [status, setStatus] = useState({ type: '', message: '' });
-  const [resumeUrl, setResumeUrl] = useState('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [resumeUrl, setResumeUrl] = useState<string>('');
 
   useEffect(() => {
-    const loadResume = async () => {
-      try {
-        const data = await fetchProfile();
-        setResumeUrl(data.resume_url || '');
-      } catch {
-        console.error('Failed to load resume');
-      }
-    };
-    loadResume();
+    fetchProfile()
+      .then((data) => {
+        if (data.resume_url) {
+          setResumeUrl(data.resume_url);
+        }
+      })
+      .catch((err) => {
+        console.warn('Profile fetch offline; using defaults:', err);
+      });
   }, []);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus({ type: 'loading', message: 'Encrypting and sending...' });
-    try {
-      await submitEnquiry(formData);
-      setStatus({ type: 'success', message: 'Message successfully intercepted and stored!' });
-      setFormData({ name: '', email: '', message: '' });
-      setTimeout(() => setStatus({ type: '', message: '' }), 5000);
-    } catch (err) {
-      setStatus({ type: 'error', message: err instanceof Error ? err.message : 'Transmission failed.' });
-    }
-  };
 
   return (
     <div className="portfolio-app">
-      <Header />
+      {/* 3D Hyperspeed Intro WebGL Loader */}
+      {isLoading && (
+        <HyperspeedLoader onComplete={() => setIsLoading(false)} />
+      )}
 
+      {/* Scroll Progress Indicator */}
+      <ScrollProgress />
+
+      {/* Physics-Based Custom Cursor & Lens System */}
+      <CustomCursor />
+
+      {/* Floating Dynamic Navbar */}
+      <Navbar />
+
+      {/* Main Sections */}
       <main>
         <Hero />
-
-        {/* About section */}
-        <section id="about" className="section container">
-          <div className="section-header">
-            <h2 className="section-title"><span className="section-hash">#</span>about-me</h2>
-            <div className="section-line"></div>
-          </div>
-          <div className="about-grid">
-            <motion.div
-              className="about-text glass"
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <div className="about-box">
-                <p>Hello, i’m Vinish!</p>
-                <br />
-                <p>I’m a self-taught front-end developer based in India. I specialize in building high-performance, responsive web applications that combine modern aesthetics with flawless functionality.</p>
-                <br />
-                <p>Transforming complex requirements into intuitive, user-friendly digital experiences is what I do best. I’m always pushing boundaries and exploring the latest in tech to build the next generation of web products.</p>
-                <br />
-                <ul style={{ listStyleType: 'square', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', color: 'var(--text-dim)', fontSize: '0.95rem', lineHeight: '1.5' }}>
-                  <li>Designed and implemented production-grade RESTful APIs and backend services.</li>
-                  <li>Built responsive, modular front-end applications and integrated them with backend services.</li>
-                  <li>Architected deployment-ready solutions using containerization and CI/CD practices.</li>
-                  <li>Enhanced performance and maintainability through modular architecture, automated testing, and code reviews.</li>
-                  <li>Collaborated with product stakeholders to translate requirements into prioritized deliverables.</li>
-                </ul>
-                <br />
-                <div className="about-btns">
-                  <a href="#contacts" className="btn btn-primary">Read more ~~{'>'}</a>
-                  {resumeUrl && (
-                    <a href={resumeUrl} target="_blank" className="btn btn-filled">
-                      CV.pdf
-                    </a>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-            <motion.div
-              className="about-visuals"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-            >
-              <div className="profile-wrapper glass">
-                <img src="/images/hero.png" alt="Vinish Illustration" className="profile-img" />
-                <div className="profile-accent"></div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        <ProjectsList />
-
-        {/* Contacts section */}
-        <section id="contacts" className="section container">
-          <div className="section-header">
-            <h2 className="section-title"><span className="section-hash">#</span>contacts</h2>
-            <div className="section-line"></div>
-          </div>
-          <div className="contacts-grid">
-            <div className="contacts-info">
-              <p className="contact-msg-top">
-                I’m always open to discussing new projects, creative ideas or freelance opportunities to be part of your visions.
-              </p>
-
-              <div className="social-box glass">
-                <h3>Message me here</h3>
-                <div className="social-links">
-                  <div className="social-item" style={{ flexWrap: 'wrap' }}>
-                    <Phone size={18} className="social-icon" style={{ flexShrink: 0 }} />
-                    <a href="tel:+918107593443" style={{ color: 'inherit', textDecoration: 'none', wordBreak: 'break-word' }} className="hover-link">+91 8107593443</a>
-                  </div>
-                  <div className="social-item" style={{ flexWrap: 'wrap' }}>
-                    <Mail size={18} className="social-icon" style={{ flexShrink: 0 }} />
-                    <a href="mailto:vinishpurohit3110@gmail.com" style={{ color: 'inherit', textDecoration: 'none', wordBreak: 'break-all' }} className="hover-link">vinishpurohit3110@gmail.com</a>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginTop: '2rem', maxWidth: '100%', overflowX: 'hidden' }}>
-                <div
-                  className="badge-base LI-profile-badge"
-                  data-locale="en_US"
-                  data-size="medium"
-                  data-theme={theme === 'light' ? 'light' : 'dark'}
-                  data-type="VERTICAL"
-                  data-vanity="vinishpurohit"
-                  data-version="v1"
-                >
-                  <a className="badge-base__link LI-simple-link" href="https://in.linkedin.com/in/vinishpurohit?trk=profile-badge">Vinish Purohit</a>
-                </div>
-              </div>
-            </div>
-
-            <div className="contact-form-container glass">
-              <form className="contact-form" onSubmit={handleSubmit}>
-                <div className="input-group">
-                  <div className="input-wrapper">
-                    <label>Name</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div className="input-wrapper">
-                    <label>Email</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="input-wrapper">
-                  <label>Message</label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                  ></textarea>
-                </div>
-                <button type="submit" disabled={status.type === 'loading'} className="btn btn-filled">
-                  {status.type === 'loading' ? 'Sending...' : 'Send Message'} <Send size={16} />
-                </button>
-
-                <AnimatePresence>
-                  {status.message && (
-                    <motion.p
-                      className={`status-msg ${status.type}`}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      {status.message}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </form>
-            </div>
-          </div>
-        </section>
+        <About resumeUrl={resumeUrl} />
+        <Skills />
+        <Experience />
+        <Projects />
+        <Contact resumeUrl={resumeUrl} />
       </main>
 
-      <footer className="footer-v2 glass">
-        <div className="container footer-content">
-          <div className="footer-top">
-            <div className="footer-brand">
-              <span className="logo">#Vinish</span>
-              <p className="footer-tagline">Web developer and designer</p>
-            </div>
-            <div className="footer-socials">
-              <h3>Media</h3>
-              <div className="footer-icons">
-                {/* Icons */}
-              </div>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p className="copyright">© {new Date().getFullYear()} Vinish. Built with Next.js & PostgreSQL.</p>
-          </div>
-        </div>
-      </footer>
-
+      {/* Technical Footer */}
+      <Footer />
     </div>
   );
 }
+

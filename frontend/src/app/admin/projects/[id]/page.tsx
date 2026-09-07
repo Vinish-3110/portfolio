@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchProject, updateProject, uploadFile } from '@/lib/api';
+import Link from 'next/link';
+import { fetchProject, updateProject } from '@/lib/api';
 import '../../admin-theme.css';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, UploadCloud, FolderGit2, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,6 +26,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
   const [isFeatured, setIsFeatured] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState('');
   const [projectImage, setProjectImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -43,9 +45,17 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
         setCurrentImageUrl(project.image || '');
         setIsFeatured(project.isFeatured || false);
       })
-      .catch(err => setError('Failed to pull project attributes.'))
+      .catch(() => setError('Failed to retrieve project details.'))
       .finally(() => setLoading(false));
   }, [unwrappedParams.id, router]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setProjectImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,96 +79,207 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
         formData.append('image', projectImage);
       }
 
-      console.log('Update payload:', formData);
-      const res = await updateProject(unwrappedParams.id, formData, token);
-      console.log('Update response:', res);
-      setSuccess('Entity updated successfully. Redirecting...');
-      setProjectImage(null);
-      setTimeout(() => router.push('/admin'), 1500);
-    } catch (err) {
-      console.error('Update failed:', err);
-      setError('Failed to rewrite entity attributes.');
+      await updateProject(unwrappedParams.id, formData, token);
+      setSuccess('Project updated successfully! Redirecting to dashboard...');
+      setTimeout(() => router.push('/admin'), 1200);
+    } catch {
+      setError('Failed to update project. Please verify inputs.');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return (
-    <div className="admin-loading-screen">
-      <div className="loader"></div>
-      <p>Fetching entity data...</p>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="admin-loading-screen">
+        <div className="admin-spinner" />
+        <p>Loading project editor...</p>
+      </div>
+    );
+  }
+
+  const effectiveImage = imagePreview || (currentImageUrl ? (
+    currentImageUrl.startsWith('http') 
+      ? currentImageUrl 
+      : `${(process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-d559.onrender.com/api').replace('/api', '')}${currentImageUrl}`
+  ) : null);
 
   return (
-    <div className="admin-modular-shell">
-      <main className="admin-main-content" style={{ margin: '0 auto', maxWidth: '800px', width: '100%' }}>
+    <div className="admin-modular-shell" style={{ justifyContent: 'center' }}>
+      <main className="admin-main-content" style={{ margin: '0 auto', maxWidth: '840px', width: '100%', padding: '2.5rem 1.5rem' }}>
+        {/* Header with Breadcrumb */}
         <header className="admin-top-bar glass" style={{ marginBottom: '2rem' }}>
-           <div className="top-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-             <button onClick={() => router.push('/admin')} className="icon-btn-edit" style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.8rem', borderRadius: '50%', cursor: 'pointer' }}>
-                <ArrowLeft size={20} />
-             </button>
-             <h1>Entity Inspector: <span style={{ color: 'var(--text-main)' }}>{title}</span></h1>
-           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <Link 
+              href="/admin" 
+              className="refresh-btn-round"
+              title="Return to Dashboard"
+              aria-label="Return to Dashboard"
+            >
+              <ArrowLeft size={18} />
+            </Link>
+            <div className="top-title">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', color: '#9ca3af' }}>
+                <Link href="/admin" style={{ color: '#9ca3af', textDecoration: 'none' }}>Admin</Link>
+                <span>/</span>
+                <span>Projects</span>
+                <span>/</span>
+                <span style={{ color: '#10b981' }}>Edit</span>
+              </div>
+              <h1 style={{ fontSize: '1.375rem' }}>{title || 'Edit Project'}</h1>
+            </div>
+          </div>
         </header>
 
+        {/* Global Feedback Banners */}
         <AnimatePresence>
-          {error && <motion.div initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}} className="alert-box error">{error}</motion.div>}
-          {success && <motion.div initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}} className="alert-box success">{success}</motion.div>}
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: -10 }} 
+              className="alert-box error"
+            >
+              <AlertCircle size={18} style={{ flexShrink: 0 }} />
+              <span>{error}</span>
+            </motion.div>
+          )}
+          {success && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: -10 }} 
+              className="alert-box success"
+            >
+              <CheckCircle2 size={18} style={{ flexShrink: 0 }} />
+              <span>{success}</span>
+            </motion.div>
+          )}
         </AnimatePresence>
 
+        {/* Edit Form Card */}
         <section className="admin-card glass">
           <div className="card-header">
-            <h2>Rewrite configuration attributes</h2>
+            <h2>
+              <FolderGit2 size={20} style={{ color: '#10b981' }} />
+              <span>Project Configuration</span>
+            </h2>
           </div>
           
           <form onSubmit={handleUpdate} className="modular-form">
-            <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-               <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Entity Title</label>
-               <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <div className="input-wrapper">
+              <label htmlFor="edit-title">Project Title</label>
+              <input 
+                id="edit-title"
+                type="text" 
+                value={title} 
+                onChange={(e) => setTitle(e.target.value)} 
+                required 
+              />
             </div>
             
-            <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-               <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Entity Description (Ctrl+Enter for new line | Array Format)</label>
-               <textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} required />
+            <div className="input-wrapper">
+              <label htmlFor="edit-desc">Project Highlights (One per line)</label>
+              <textarea 
+                id="edit-desc"
+                rows={5} 
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)} 
+                required 
+              />
             </div>
 
-            <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-               <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Tech Stack (Comma Separated)</label>
-               <input type="text" value={techs} onChange={(e) => setTechs(e.target.value)} required />
+            <div className="input-wrapper">
+              <label htmlFor="edit-techs">Technologies (Comma-separated)</label>
+              <input 
+                id="edit-techs"
+                type="text" 
+                value={techs} 
+                onChange={(e) => setTechs(e.target.value)} 
+                required 
+              />
+              {techs && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.4rem' }}>
+                  {techs.split(',').map((t, idx) => t.trim() && (
+                    <span key={idx} className="meta-tag">{t.trim()}</span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="input-row">
-              <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                 <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Live Domain</label>
-                 <input type="text" value={liveLink} onChange={(e) => setLiveLink(e.target.value)} />
+              <div className="input-wrapper">
+                <label htmlFor="edit-live">Live Demo URL</label>
+                <input 
+                  id="edit-live"
+                  type="text" 
+                  value={liveLink} 
+                  onChange={(e) => setLiveLink(e.target.value)} 
+                  placeholder="https://..."
+                />
               </div>
-              <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                 <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Source Repository</label>
-                 <input type="text" value={githubLink} onChange={(e) => setGithubLink(e.target.value)} />
+              <div className="input-wrapper">
+                <label htmlFor="edit-github">GitHub Repository</label>
+                <input 
+                  id="edit-github"
+                  type="text" 
+                  value={githubLink} 
+                  onChange={(e) => setGithubLink(e.target.value)} 
+                  placeholder="https://github.com/..."
+                />
               </div>
             </div>
             
-            <div className="input-row">
-               <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                 <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Update Image File</label>
-                 <input type="file" onChange={(e) => e.target.files && setProjectImage(e.target.files[0])} />
-               </div>
-               {currentImageUrl && (
-                  <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Current Image</label>
-                    <img 
-                      src={currentImageUrl.startsWith('http') ? currentImageUrl : `${(process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-d559.onrender.com/api').replace('/api', '')}${currentImageUrl}`} 
-                      alt="Preview" 
-                      style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }} 
-                    />
-                  </div>
-               )}
+            <div className="input-wrapper">
+              <label>Cover Image</label>
+              <div className="file-input-styled" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <UploadCloud size={20} style={{ color: '#10b981' }} />
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleImageChange} 
+                  style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
+                />
+              </div>
+              {effectiveImage && (
+                <div style={{ marginTop: '0.75rem' }}>
+                  <img 
+                    src={effectiveImage} 
+                    alt="Cover Preview" 
+                    style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--admin-border)' }} 
+                  />
+                </div>
+              )}
             </div>
 
-            <button type="button" disabled={saving} onClick={handleUpdate} className="action-btn-filled" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
-               {saving ? 'Rewriting...' : 'Rewrite Configuration'} <Save size={18} />
-            </button>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+              <button 
+                type="submit" 
+                disabled={saving} 
+                className="action-btn-filled" 
+                style={{ flex: 1 }}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 size={18} className="admin-spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
+                    <span>Saving Changes...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={18} />
+                    <span>Save Changes</span>
+                  </>
+                )}
+              </button>
+
+              <Link 
+                href="/admin" 
+                className="action-btn-outline"
+                style={{ textDecoration: 'none' }}
+              >
+                Cancel
+              </Link>
+            </div>
           </form>
         </section>
       </main>
