@@ -38,6 +38,9 @@ export default function AdminDashboard() {
   
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [resumeFilename, setResumeFilename] = useState('');
+  const [resumeInputKey, setResumeInputKey] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -60,6 +63,7 @@ export default function AdminDashboard() {
       setProjects(projData);
       setEnquiries(enqData);
       setResumeUrl(profileData.resume_url || '');
+      setResumeFilename(profileData.resume_filename || '');
       setThemeColor(profileData.theme_color || '#b87af0');
       setNewThemeColor(profileData.theme_color || '#b87af0');
     } catch {
@@ -124,21 +128,30 @@ export default function AdminDashboard() {
     if (!token) return;
 
     try {
-      let uploadedResumeUrl = resumeUrl;
-      if (newResumeFile) {
-        uploadedResumeUrl = await uploadFile(newResumeFile);
-      }
+      setSavingProfile(true);
+      setError('');
+      setSuccess('');
 
-      await updateProfile({ resume_url: uploadedResumeUrl, theme_color: newThemeColor }, token);
-      setSuccess('Global attributes updated.');
-      setResumeUrl(uploadedResumeUrl);
-      setThemeColor(newThemeColor);
-      
-      // Update global theme immediately for preview
-      document.documentElement.style.setProperty('--primary', newThemeColor);
-      document.documentElement.style.setProperty('--primary-op', newThemeColor + '1A');
-    } catch {
-      setError('Attributes update failed.');
+      const updated = await updateProfile({
+        theme_color: newThemeColor,
+        resume: newResumeFile,
+      }, token);
+
+      setResumeUrl(updated.resume_url || '');
+      setResumeFilename(updated.resume_filename || '');
+      setThemeColor(updated.theme_color || newThemeColor);
+      setNewResumeFile(null);
+      setResumeInputKey((key) => key + 1);
+      setSuccess(newResumeFile
+        ? 'Resume saved in the database.'
+        : 'Theme color saved.');
+
+      document.documentElement.style.setProperty('--primary', updated.theme_color || newThemeColor);
+      document.documentElement.style.setProperty('--primary-op', (updated.theme_color || newThemeColor) + '1A');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save the resume.');
+    } finally {
+      setSavingProfile(false);
     }
   };
 
@@ -217,8 +230,14 @@ export default function AdminDashboard() {
                </div>
                <form onSubmit={handleUpdateProfile} className="modular-form">
                   <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Resume File (PDF/Doc)</label>
-                    <input type="file" onChange={(e) => e.target.files && setNewResumeFile(e.target.files[0])} />
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>Resume file (PDF or Word, max 8 MB)</label>
+                    <input
+                      key={resumeInputKey}
+                      type="file"
+                      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      onChange={(e) => setNewResumeFile(e.target.files?.[0] || null)}
+                    />
+                    {newResumeFile && <p className="attribute-info">Selected: {newResumeFile.name}</p>}
                   </div>
                   
                   <div className="input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -240,9 +259,16 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <button type="submit" className="action-btn-outline" style={{ marginTop: '0.5rem' }}>Update Attributes</button>
+                  <button type="submit" className="action-btn-outline" style={{ marginTop: '0.5rem' }} disabled={savingProfile}>
+                    {savingProfile ? 'Saving...' : 'Save resume'}
+                  </button>
                </form>
-               {resumeUrl && <p className="attribute-info" style={{ marginTop: '1rem' }}>Active Resume Ptr: <a href={resumeUrl} target="_blank" rel="noreferrer">Open</a></p>}
+               {resumeUrl && (
+                 <p className="attribute-info" style={{ marginTop: '1rem' }}>
+                   Saved resume{resumeFilename ? `: ${resumeFilename}` : ''}.{' '}
+                   <a href={resumeUrl} target="_blank" rel="noreferrer">Open</a>
+                 </p>
+               )}
                {themeColor && <p className="attribute-info">Active Theme: <span style={{ color: themeColor }}>{themeColor}</span></p>}
             </section>
           </div>

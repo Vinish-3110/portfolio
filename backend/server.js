@@ -41,17 +41,30 @@ app.use('/api/profile', require('./routes/profileRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api', require('./routes/analyticsRoutes'));
 
+const fs = require('fs');
 const path = require('path');
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const uploadsDir = path.join(__dirname, 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
+app.use('/uploads', express.static(uploadsDir));
 
 app.get('/api/health', (req, res) => {
   res.json({ message: 'Server is running', database: 'MongoDB' });
 });
 
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  const status = err.statusCode || err.status || 500;
+  res.status(status).json({ message: err.message || 'Server error' });
+});
+
 // Initialize Swagger
 setupSwagger(app);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;

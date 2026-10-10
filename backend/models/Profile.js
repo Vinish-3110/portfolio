@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 
 const profileSchema = new mongoose.Schema({
   resume_url: String,
+  resume_filename: String,
+  resume_mimetype: String,
+  resume_data: { type: Buffer, select: false },
   theme_color: { type: String, default: '#b87af0' },
   owner_email: { type: String, unique: true, default: 'admin@portfolio.com' }
 }, { timestamps: true });

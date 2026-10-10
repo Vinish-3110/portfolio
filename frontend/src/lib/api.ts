@@ -43,7 +43,10 @@ export type EnquiryPayload = {
 
 export type Profile = {
   resume_url?: string;
+  resume_filename?: string;
   theme_color?: string;
+  has_resume?: boolean;
+  message?: string;
 };
 
 export const fetchProjects = async (): Promise<Project[]> => {
@@ -161,16 +164,28 @@ export const fetchProfile = async (): Promise<Profile> => {
   return response.json(); // { resume_url: '...', theme_color: '...' }
 };
 
-export const updateProfile = async (data: Profile, token: string) => {
+export const updateProfile = async (data: Profile & { resume?: File | null }, token: string) => {
+  const formData = new FormData();
+  if (data.theme_color) formData.append('theme_color', data.theme_color);
+  if (data.resume) formData.append('resume', data.resume);
+
   const response = await fetch(`${API_URL}/profile`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: JSON.stringify(data),
+    body: formData,
   });
-  if (!response.ok) throw new Error('Failed to update profile');
+  if (!response.ok) {
+    let message = 'Failed to save resume';
+    try {
+      const body = await response.json();
+      if (body.message) message = body.message;
+    } catch {
+      // The server did not return JSON.
+    }
+    throw new Error(message);
+  }
   return response.json();
 };
 
