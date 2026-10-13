@@ -24,6 +24,13 @@ const corsOptions = {
     if (origin.match(/https?:\/\/.+\.vercel\.app$/) || origin.match(/https?:\/\/.+\.onrender\.com$/)) {
       return callback(null, true);
     }
+    if (origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)) {
+      return callback(null, true);
+    }
+    // Apex site plus any subdomain, including api and admin.
+    if (origin.match(/^https:\/\/([a-z0-9-]+\.)*vinishpurohit\.in$/)) {
+      return callback(null, true);
+    }
     // Fallback block if unallowed
     return callback(new Error('CORS policy does not allow access from this Origin'), false);
   },
@@ -38,6 +45,8 @@ app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/enquiries', require('./routes/enquiryRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/profile', require('./routes/profileRoutes'));
+app.use('/api/experience', require('./routes/experienceRoutes'));
+app.use('/api/skills', require('./routes/skillRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api', require('./routes/analyticsRoutes'));
 

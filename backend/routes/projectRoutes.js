@@ -5,6 +5,9 @@ const asyncHandler = require('express-async-handler');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const adminAuth = require('../middleware/adminAuth');
+
+const uploadsDir = path.join(__dirname, '../uploads');
 
 const uploadsDir = path.join(__dirname, '../uploads');
 
@@ -43,7 +46,7 @@ router.get('/', asyncHandler(async (req, res) => {
 
 // @desc    Create a project
 // @route   POST /api/projects
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', adminAuth, asyncHandler(async (req, res) => {
   const { title, description, techs, live_link, github_link, is_featured, image } = req.body;
   const project = new Project({
     title,
@@ -62,7 +65,7 @@ router.post('/', asyncHandler(async (req, res) => {
 
 // @desc    Delete a project
 // @route   DELETE /api/projects/:id
-router.delete('/:id', asyncHandler(async (req, res) => {
+router.delete('/:id', adminAuth, asyncHandler(async (req, res) => {
   const project = await Project.findById(req.params.id);
   if (project) {
     if (project.image) {
@@ -88,7 +91,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 
 // @desc    Update a project
 // @route   PUT /api/projects/:id
-router.put('/:id', upload.single('image'), asyncHandler(async (req, res) => {
+router.put('/:id', adminAuth, upload.single('image'), asyncHandler(async (req, res) => {
   let { title, description, techs, live_link, github_link, is_featured } = req.body;
   const project = await Project.findById(req.params.id);
 

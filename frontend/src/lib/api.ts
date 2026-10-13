@@ -1,4 +1,4 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-d559.onrender.com/api';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vinishpurohit.in/api';
 
 export type Project = {
   _id?: string;
@@ -41,12 +41,54 @@ export type EnquiryPayload = {
   message: string;
 };
 
+export type SiteStat = { value: string; label: string; sub: string };
+
 export type Profile = {
   resume_url?: string;
-  resume_filename?: string;
   theme_color?: string;
-  has_resume?: boolean;
+  display_name?: string;
+  availability?: string;
+  role_badge?: string;
+  headline_before?: string;
+  headline_highlight?: string;
+  headline_after?: string;
+  hero_description?: string;
+  about_heading?: string;
+  about_paragraphs?: string[];
+  stats?: SiteStat[];
+  email?: string;
+  phone?: string;
+  linkedin?: string;
+  github?: string;
+  engineer_name?: string;
+  discipline?: string;
+  experience_label?: string;
+  core_focus?: string;
   message?: string;
+};
+
+export type ExperienceItem = {
+  _id?: string;
+  id?: string;
+  role: string;
+  company: string;
+  companyUrl?: string;
+  period?: string;
+  type?: string;
+  location?: string;
+  summary?: string;
+  achievements: string[];
+  technologies: string[];
+  sortOrder?: number;
+};
+
+export type SkillItem = {
+  _id?: string;
+  name: string;
+  level?: string;
+  focus?: string;
+  category: 'frontend' | 'backend' | 'database' | 'devops';
+  sortOrder?: number;
 };
 
 export const fetchProjects = async (): Promise<Project[]> => {
@@ -164,28 +206,85 @@ export const fetchProfile = async (): Promise<Profile> => {
   return response.json(); // { resume_url: '...', theme_color: '...' }
 };
 
-export const updateProfile = async (data: Profile & { resume?: File | null }, token: string) => {
-  const formData = new FormData();
-  if (data.theme_color) formData.append('theme_color', data.theme_color);
-  if (data.resume) formData.append('resume', data.resume);
-
+export const updateProfile = async (data: Profile, token: string) => {
   const response = await fetch(`${API_URL}/profile`, {
     method: 'PUT',
     headers: {
+      'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: formData,
+    body: JSON.stringify(data),
   });
-  if (!response.ok) {
-    let message = 'Failed to save resume';
-    try {
-      const body = await response.json();
-      if (body.message) message = body.message;
-    } catch {
-      // The server did not return JSON.
-    }
-    throw new Error(message);
+  if (!response.ok) throw new Error('Failed to update profile');
+  return response.json();
+};
+
+async function readError(response: Response, fallback: string) {
+  try {
+    const body = await response.json();
+    if (body.message) return body.message;
+  } catch {
+    // The server did not return JSON.
   }
+  return fallback;
+}
+
+export const fetchExperiences = async (): Promise<ExperienceItem[]> => {
+  const response = await fetch(`${API_URL}/experience`);
+  if (!response.ok) throw new Error('Failed to fetch experience');
+  return response.json();
+};
+
+export const saveExperience = async (item: Partial<ExperienceItem>, token: string, id?: string) => {
+  const response = await fetch(`${API_URL}/experience${id ? `/${id}` : ''}`, {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(item),
+  });
+  if (!response.ok) throw new Error(await readError(response, 'Failed to save experience'));
+  return response.json();
+};
+
+export const deleteExperience = async (id: string, token: string) => {
+  const response = await fetch(`${API_URL}/experience/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Failed to delete experience');
+  return response.json();
+};
+
+export const fetchSkills = async (): Promise<SkillItem[]> => {
+  const response = await fetch(`${API_URL}/skills`);
+  if (!response.ok) throw new Error('Failed to fetch skills');
+  return response.json();
+};
+
+export const saveSkill = async (item: Partial<SkillItem>, token: string, id?: string) => {
+  const response = await fetch(`${API_URL}/skills${id ? `/${id}` : ''}`, {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(item),
+  });
+  if (!response.ok) throw new Error(await readError(response, 'Failed to save skill'));
+  return response.json();
+};
+
+export const deleteSkill = async (id: string, token: string) => {
+  const response = await fetch(`${API_URL}/skills/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Failed to delete skill');
+  return response.json();
+};
+
+export const deleteEnquiry = async (id: string, token: string) => {
+  const response = await fetch(`${API_URL}/enquiries/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Failed to delete enquiry');
   return response.json();
 };
 

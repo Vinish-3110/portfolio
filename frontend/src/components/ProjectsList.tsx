@@ -14,7 +14,7 @@ const ProjectsList = () => {
     const getImageUrl = (url: string) => {
         if (!url) return '';
         if (url.startsWith('http')) return url;
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-d559.onrender.com/api';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vinishpurohit.in/api';
         return `${API_URL.replace('/api', '')}${url}`;
     };
 
