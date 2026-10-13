@@ -12,7 +12,7 @@ import Skills from '@/components/sections/Skills';
 import Experience from '@/components/sections/Experience';
 import Projects from '@/components/sections/Projects';
 import Contact from '@/components/sections/Contact';
-import { fetchProfile } from '@/lib/api';
+import { fetchProfile, Profile } from '@/lib/api';
 
 // Dynamic import with ssr: false for WebGL Three.js canvas
 const HyperspeedLoader = dynamic(
@@ -22,19 +22,17 @@ const HyperspeedLoader = dynamic(
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [resumeUrl, setResumeUrl] = useState<string>('');
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     fetchProfile()
-      .then((data) => {
-        if (data.resume_url) {
-          setResumeUrl(data.resume_url);
-        }
-      })
+      .then((data) => setProfile(data))
       .catch((err) => {
         console.warn('Profile fetch offline; using defaults:', err);
       });
   }, []);
+
+  const resumeUrl = profile?.resume_url || '';
 
   return (
     <div className="portfolio-app">
@@ -50,20 +48,41 @@ export default function Home() {
       <CustomCursor />
 
       {/* Floating Dynamic Navbar */}
-      <Navbar />
+      <Navbar displayName={profile?.display_name} availability={profile?.availability} />
 
       {/* Main Sections */}
       <main>
-        <Hero />
-        <About resumeUrl={resumeUrl} />
+        <Hero content={{
+          roleBadge: profile?.role_badge,
+          headlineBefore: profile?.headline_before,
+          headlineHighlight: profile?.headline_highlight,
+          headlineAfter: profile?.headline_after,
+          description: profile?.hero_description,
+          engineerName: profile?.engineer_name,
+          discipline: profile?.discipline,
+          experienceLabel: profile?.experience_label,
+          coreFocus: profile?.core_focus,
+        }} />
+        <About
+          resumeUrl={resumeUrl}
+          heading={profile?.about_heading}
+          paragraphs={profile?.about_paragraphs}
+          stats={profile?.stats}
+        />
         <Skills />
         <Experience />
         <Projects />
-        <Contact resumeUrl={resumeUrl} />
+        <Contact
+          resumeUrl={resumeUrl}
+          email={profile?.email}
+          phone={profile?.phone}
+          github={profile?.github}
+          linkedin={profile?.linkedin}
+        />
       </main>
 
       {/* Technical Footer */}
-      <Footer />
+      <Footer displayName={profile?.display_name} />
     </div>
   );
 }

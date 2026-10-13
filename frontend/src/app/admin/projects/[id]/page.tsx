@@ -101,7 +101,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
   const effectiveImage = imagePreview || (currentImageUrl ? (
     currentImageUrl.startsWith('http') 
       ? currentImageUrl 
-      : `${(process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-d559.onrender.com/api').replace('/api', '')}${currentImageUrl}`
+      : `${(process.env.NEXT_PUBLIC_API_URL || 'https://api.vinishpurohit.in/api').replace('/api', '')}${currentImageUrl}`
   ) : null);
 
   return (

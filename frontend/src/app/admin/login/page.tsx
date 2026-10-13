@@ -124,7 +124,7 @@ export default function AdminLoginPage() {
         </form>
 
         <div className="login-footer-links">
-          <Link href="/" className="back-home-link">
+          <Link href={process.env.NEXT_PUBLIC_SITE_URL || '/'} className="back-home-link">
             <ArrowLeft size={14} />
             <span>Return to Portfolio</span>
           </Link>

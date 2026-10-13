@@ -8,6 +8,7 @@ import {
   createProject, 
   deleteProject, 
   fetchEnquiries, 
+  deleteEnquiry,
   fetchProfile, 
   updateProfile, 
   uploadFile, 
@@ -35,7 +36,8 @@ import {
   AlertCircle, 
   CheckCircle2, 
   ShieldCheck,
-  Globe
+  Globe,
+  PenLine
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -198,6 +200,19 @@ export default function AdminDashboard() {
     setTimeout(() => setCopiedEmail(null), 2000);
   };
 
+  const handleDeleteEnquiry = async (id: string | number) => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) return;
+    if (!confirm('Delete this enquiry?')) return;
+    try {
+      await deleteEnquiry(String(id), token);
+      setSuccess('Enquiry deleted.');
+      loadData(token);
+    } catch {
+      setError('Could not delete enquiry.');
+    }
+  };
+
   const handleLogout = () => {
     if (confirm('Are you sure you want to sign out of the Admin Console?')) {
       localStorage.removeItem('adminToken');
@@ -271,10 +286,19 @@ export default function AdminDashboard() {
             <FileText size={18} />
             <span>Resume &amp; Theme</span>
           </a>
+
+          <Link
+            href="/admin/site"
+            className="nav-item-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <PenLine size={18} />
+            <span>Site Content</span>
+          </Link>
         </nav>
 
         <div className="sidebar-footer">
-          <Link href="/" target="_blank" rel="noopener noreferrer" className="sidebar-back-link">
+          <Link href={process.env.NEXT_PUBLIC_SITE_URL || '/'} target="_blank" rel="noopener noreferrer" className="sidebar-back-link">
             <Globe size={14} />
             <span>View Live Site</span>
             <ExternalLink size={12} />
@@ -318,7 +342,7 @@ export default function AdminDashboard() {
               <span>Analytics</span>
             </Link>
 
-            <Link href="/" target="_blank" rel="noopener noreferrer" className="top-action-link">
+            <Link href={process.env.NEXT_PUBLIC_SITE_URL || '/'} target="_blank" rel="noopener noreferrer" className="top-action-link">
               <ExternalLink size={16} />
               <span>Live Site</span>
             </Link>
@@ -632,6 +656,15 @@ export default function AdminDashboard() {
                             aria-label="Copy email address"
                           >
                             {copiedEmail === enq.email ? <Check size={14} style={{ color: '#10b981' }} /> : <Copy size={14} />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteEnquiry(enq._id || enq.id || '')}
+                            className="trans-copy-btn"
+                            title="Delete enquiry"
+                            aria-label="Delete enquiry"
+                          >
+                            <Trash2 size={14} />
                           </button>
                         </div>
 

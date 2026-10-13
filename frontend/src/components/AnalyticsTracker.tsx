@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { trackButtonClick, trackFormSubmit } from '@/lib/analytics';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-d559.onrender.com/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vinishpurohit.in/api';
 const VISIT_STORAGE_PREFIX = 'portfolio:last-visit';
 
 const getDailyVisitKey = (path: string) => {

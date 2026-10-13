@@ -7,7 +7,19 @@ import { GithubIcon, LinkedinIcon } from '@/components/common/Icons';
 import MagneticButton from '@/components/common/MagneticButton';
 import { EnquiryPayload, submitEnquiry } from '@/lib/api';
 
-export default function Contact({ resumeUrl }: { resumeUrl?: string }) {
+export default function Contact({
+  resumeUrl,
+  email,
+  phone,
+  github,
+  linkedin,
+}: {
+  resumeUrl?: string;
+  email?: string;
+  phone?: string;
+  github?: string;
+  linkedin?: string;
+}) {
   const [formData, setFormData] = useState<EnquiryPayload>({
     name: '',
     email: '',
@@ -16,8 +28,10 @@ export default function Contact({ resumeUrl }: { resumeUrl?: string }) {
   const [status, setStatus] = useState<{ type: string; message: string }>({ type: '', message: '' });
   const [copiedEmail, setCopiedEmail] = useState(false);
 
-  const emailAddress = 'vinishpurohit3110@gmail.com';
-  const phoneNumber = '+91 8107593443';
+  const emailAddress = email || 'vinishpurohit3110@gmail.com';
+  const phoneNumber = phone || '+91 8107593443';
+  const githubUrl = github || 'https://github.com/Vinish-3110';
+  const linkedinUrl = linkedin || 'https://www.linkedin.com/in/vinishpurohit';
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(emailAddress);
@@ -101,7 +115,7 @@ export default function Contact({ resumeUrl }: { resumeUrl?: string }) {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1.5rem' }}>
               <MagneticButton
                 as="a"
-                href="https://github.com/Vinish-3110"
+                href={githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-secondary btn-sm"
@@ -113,7 +127,7 @@ export default function Contact({ resumeUrl }: { resumeUrl?: string }) {
 
               <MagneticButton
                 as="a"
-                href="https://in.linkedin.com/in/vinishpurohit"
+                href={linkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-secondary btn-sm"

@@ -449,6 +449,8 @@
 .modular-form input[type="text"],
 .modular-form input[type="password"],
 .modular-form input[type="email"],
+.modular-form input:not([type]),
+.modular-form select,
 .modular-form textarea {
   background: rgba(10, 13, 18, 0.8);
   border: 1px solid var(--admin-border);
@@ -463,6 +465,7 @@
 }
 
 .modular-form input:focus,
+.modular-form select:focus,
 .modular-form textarea:focus {
   border-color: var(--admin-accent);
   box-shadow: 0 0 0 3px var(--admin-accent-glow);

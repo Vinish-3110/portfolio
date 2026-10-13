@@ -1,11 +1,33 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink } from 'lucide-react';
-import { experienceData } from '@/data/experienceData';
+import { experienceData, ExperienceItem } from '@/data/experienceData';
+import { fetchExperiences } from '@/lib/api';
 
 export default function Experience() {
+  const [items, setItems] = useState<ExperienceItem[]>(experienceData);
+
+  useEffect(() => {
+    fetchExperiences()
+      .then((rows) => {
+        if (!rows.length) return;
+        setItems(rows.map((row) => ({
+          id: row._id || row.id || row.role,
+          role: row.role,
+          company: row.company,
+          companyUrl: row.companyUrl,
+          period: row.period || '',
+          type: row.type || '',
+          location: row.location || '',
+          summary: row.summary || '',
+          achievements: row.achievements || [],
+          technologies: row.technologies || [],
+        })));
+      })
+      .catch(() => {});
+  }, []);
   return (
     <section id="experience" className="section-wrapper">
       <div className="container">
@@ -25,7 +47,7 @@ export default function Experience() {
 
         {/* Editorial Timeline / Ledger */}
         <div className="experience-ledger">
-          {experienceData.map((exp, index) => (
+          {items.map((exp, index) => (
             <motion.article
               key={exp.id}
               initial={{ opacity: 0, y: 30 }}

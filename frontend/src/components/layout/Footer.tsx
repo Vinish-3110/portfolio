@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowUp } from 'lucide-react';
 import MagneticButton from '@/components/common/MagneticButton';
 
-export default function Footer() {
+export default function Footer({ displayName = 'VINISH' }: { displayName?: string }) {
   const [time, setTime] = useState<string>('');
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function Footer() {
         {/* Right: Back to Top & Copyright */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            © {new Date().getFullYear()} VINISH
+            © {new Date().getFullYear()} {displayName}
           </span>
           <MagneticButton
             as="button"

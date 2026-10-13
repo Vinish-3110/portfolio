@@ -16,7 +16,19 @@ const featuredTechs = [
   'Angular',
 ];
 
-export default function Hero() {
+export type HeroContent = {
+  roleBadge?: string;
+  headlineBefore?: string;
+  headlineHighlight?: string;
+  headlineAfter?: string;
+  description?: string;
+  engineerName?: string;
+  discipline?: string;
+  experienceLabel?: string;
+  coreFocus?: string;
+};
+
+export default function Hero({ content }: { content?: HeroContent }) {
   const [latency, setLatency] = useState(24);
 
   useEffect(() => {
@@ -40,18 +52,19 @@ export default function Hero() {
             {/* Experience Status Pill */}
             <div className="hero-badge-pill">
               <span className="navbar-pulse-dot" />
-              <span>WEB DEVELOPER • 2+ YEARS PROFESSIONAL EXP</span>
+              <span>{content?.roleBadge || 'WEB DEVELOPER • 2+ YEARS PROFESSIONAL EXP'}</span>
             </div>
 
             {/* Main Editorial Headline */}
             <h1 className="hero-title">
-              Building modern <span className="hero-highlight-word">digital experiences</span>{' '}&amp;{' '}scalable web apps.
+              {content?.headlineBefore || 'Building modern'}{' '}
+              <span className="hero-highlight-word">{content?.headlineHighlight || 'digital experiences'}</span>{' '}
+              {content?.headlineAfter || '& scalable web apps.'}
             </h1>
 
             {/* Supporting Description */}
             <p className="hero-description">
-              Engineering high-performance web products with Next.js, React, Node.js, and Python.
-              Focused on fluid 60fps micro-interactions, clean system architecture, and accessible user interfaces.
+              {content?.description || 'Engineering high-performance web products with Next.js, React, Node.js, and Python. Focused on fluid 60fps micro-interactions, clean system architecture, and accessible user interfaces.'}
             </p>
 
             {/* Primary Actions */}
@@ -103,15 +116,15 @@ export default function Hero() {
             <div className="telemetry-body">
               <div className="telemetry-row">
                 <span className="telemetry-label">{"//"} engineer</span>
-                <span className="telemetry-val" style={{ color: 'var(--text-primary)' }}>Vinish Purohit</span>
+                <span className="telemetry-val" style={{ color: 'var(--text-primary)' }}>{content?.engineerName || 'Vinish Purohit'}</span>
               </div>
               <div className="telemetry-row">
                 <span className="telemetry-label">{"//"} primary_discipline</span>
-                <span className="telemetry-val">Frontend Architecture &amp; Full-Stack</span>
+                <span className="telemetry-val">{content?.discipline || 'Frontend Architecture & Full-Stack'}</span>
               </div>
               <div className="telemetry-row">
                 <span className="telemetry-label">{"//"} experience</span>
-                <span className="telemetry-val">2+ Years Production Grade</span>
+                <span className="telemetry-val">{content?.experienceLabel || '2+ Years Production Grade'}</span>
               </div>
               <div className="telemetry-row">
                 <span className="telemetry-label">{"//"} telemetry_ping</span>
@@ -122,7 +135,7 @@ export default function Hero() {
               </div>
               <div className="telemetry-row">
                 <span className="telemetry-label">{"//"} core_focus</span>
-                <span className="telemetry-val">SSR, App Router, REST APIs, Micro-interactions</span>
+                <span className="telemetry-val">{content?.coreFocus || 'SSR, App Router, REST APIs, Micro-interactions'}</span>
               </div>
 
               <div style={{ marginTop: '1.25rem', marginBottom: '0.5rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>

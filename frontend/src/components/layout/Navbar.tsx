@@ -14,7 +14,13 @@ const navLinks = [
   { href: '#contact', label: 'Contact', index: '05' },
 ];
 
-export default function Navbar() {
+export default function Navbar({
+  displayName = 'VINISH',
+  availability = 'AVAILABLE',
+}: {
+  displayName?: string;
+  availability?: string;
+}) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -37,10 +43,10 @@ export default function Navbar() {
         <div className="container navbar-content">
           {/* Logo & Availability Status */}
           <MagneticButton as="a" href="#home" className="navbar-logo">
-            <span>VINISH</span>
+            <span>{displayName}</span>
             <span className="navbar-logo-badge">
               <span className="navbar-pulse-dot" />
-              AVAILABLE
+              {availability}
             </span>
           </MagneticButton>
 

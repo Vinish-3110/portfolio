@@ -1,16 +1,34 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Marquee from '@/components/common/Marquee';
-import { skillsCategories, skillsList, marqueeTechs } from '@/data/skillsData';
+import { skillsCategories, skillsList, marqueeTechs, SkillItem } from '@/data/skillsData';
+import { fetchSkills } from '@/lib/api';
 
 export default function Skills() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [skills, setSkills] = useState<SkillItem[]>(skillsList);
+  const [marquee, setMarquee] = useState<string[]>([...marqueeTechs]);
+
+  useEffect(() => {
+    fetchSkills()
+      .then((rows) => {
+        if (!rows.length) return;
+        setSkills(rows.map((row) => ({
+          name: row.name,
+          level: row.level || '',
+          focus: row.focus || '',
+          category: row.category,
+        })));
+        setMarquee(rows.map((row) => row.name));
+      })
+      .catch(() => {});
+  }, []);
 
   const filteredSkills = activeCategory === 'all'
-    ? skillsList
-    : skillsList.filter((s) => s.category === activeCategory);
+    ? skills
+    : skills.filter((s) => s.category === activeCategory);
 
   return (
     <section id="stack" className="section-wrapper" style={{ paddingBottom: '3rem' }}>
@@ -31,7 +49,7 @@ export default function Skills() {
       </div>
 
       {/* Infinite Horizontal Marquee */}
-      <Marquee items={marqueeTechs} speedSeconds={35} />
+      <Marquee items={marquee} speedSeconds={35} />
 
       <div className="container">
         {/* Filter Tabs */}

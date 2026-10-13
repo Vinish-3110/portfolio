@@ -5,14 +5,32 @@ import { motion } from 'framer-motion';
 import { FileDown, ArrowUpRight } from 'lucide-react';
 import MagneticButton from '@/components/common/MagneticButton';
 
-const stats = [
+const defaultStats = [
   { value: '2+', label: 'Years Experience', sub: 'Production software engineering' },
   { value: '15+', label: 'Projects & Modules', sub: 'Shipped to real users' },
   { value: '98%', label: 'Lighthouse Target', sub: 'Performance & Accessibility' },
   { value: '60fps', label: 'Interaction Goal', sub: 'Fluid UI micro-interactions' },
 ];
 
-export default function About({ resumeUrl }: { resumeUrl?: string }) {
+const defaultParagraphs = [
+  'I am a Web Developer with 2+ years of professional engineering experience, specializing in the modern JavaScript and Python ecosystems. My focus is at the intersection of robust system design and delightful, polished user interfaces.',
+  'Over the past two years, I have architected high-performance frontends with Next.js and React, built resilient Node.js and Python (FastAPI/Django) microservices, and engineered data pipelines with PostgreSQL, MongoDB, and Redis.',
+  'I care deeply about software craftsmanship: zero layout shifts, accessible semantic HTML, modular component architecture, and fluid transitions that make digital products feel alive without compromising speed.',
+];
+
+export default function About({
+  resumeUrl,
+  heading,
+  paragraphs,
+  stats,
+}: {
+  resumeUrl?: string;
+  heading?: string;
+  paragraphs?: string[];
+  stats?: { value: string; label: string; sub: string }[];
+}) {
+  const aboutParagraphs = paragraphs?.length ? paragraphs : defaultParagraphs;
+  const aboutStats = stats?.length ? stats : defaultStats;
   return (
     <section id="about" className="section-wrapper">
       <div className="container">
@@ -23,7 +41,7 @@ export default function About({ resumeUrl }: { resumeUrl?: string }) {
             <span>ABOUT / 01</span>
           </div>
           <h2 className="section-heading-large">
-            I build scalable, interactive, and user-focused web experiences.
+            {heading || 'I build scalable, interactive, and user-focused web experiences.'}
           </h2>
         </div>
 
@@ -37,15 +55,9 @@ export default function About({ resumeUrl }: { resumeUrl?: string }) {
             transition={{ duration: 0.6 }}
             className="about-narrative"
           >
-            <p>
-              I am a <strong>Web Developer with 2+ years of professional engineering experience</strong>, specializing in the modern JavaScript and Python ecosystems. My focus is at the intersection of robust system design and delightful, polished user interfaces.
-            </p>
-            <p>
-              Over the past two years, I have architected high-performance frontends with <strong>Next.js and React</strong>, built resilient <strong>Node.js and Python (FastAPI/Django)</strong> microservices, and engineered data pipelines with PostgreSQL, MongoDB, and Redis.
-            </p>
-            <p>
-              I care deeply about software craftsmanship: zero layout shifts, accessible semantic HTML, modular component architecture, and fluid transitions that make digital products feel alive without compromising speed.
-            </p>
+            {aboutParagraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '2rem' }}>
               {resumeUrl ? (
@@ -89,7 +101,7 @@ export default function About({ resumeUrl }: { resumeUrl?: string }) {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="about-metrics-grid"
           >
-            {stats.map((item, idx) => (
+            {aboutStats.map((item, idx) => (
               <div key={idx} className="metric-card">
                 <span className="metric-number">{item.value}</span>
                 <span className="metric-label">{item.label}</span>
