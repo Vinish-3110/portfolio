@@ -4,7 +4,6 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 
 dotenv.config();
-connectDB();
 
 const app = express();
 app.set('trust proxy', 1);
@@ -57,7 +56,7 @@ fs.mkdirSync(uploadsDir, { recursive: true });
 app.use('/uploads', express.static(uploadsDir));
 
 app.get('/api/health', (req, res) => {
-  res.json({ message: 'Server is running', database: 'MongoDB' });
+  res.json({ message: 'Server is running', database: 'PostgreSQL' });
 });
 
 app.use((err, req, res, next) => {
@@ -71,9 +70,16 @@ setupSwagger(app);
 
 if (require.main === module) {
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  connectDB()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+      });
+    })
+    .catch((error) => {
+      console.error(`PostgreSQL Error: ${error.message}`);
+      process.exit(1);
+    });
 }
 
 module.exports = app;

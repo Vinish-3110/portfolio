@@ -3,7 +3,13 @@ services:
     build: ./backend
     environment:
       PORT: 5000
-      MONGODB_URI: ${MONGODB_URI:-}
+      DATABASE_URL: ${DATABASE_URL:-}
+      POSTGRES_URL: ${POSTGRES_URL:-}
+      POSTGRES_HOST: ${POSTGRES_HOST:-}
+      POSTGRES_PORT: ${POSTGRES_PORT:-}
+      POSTGRES_USER: ${POSTGRES_USER:-}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      POSTGRES_DB: ${POSTGRES_DB:-}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://api.vinishpurohit.in}
@@ -55,23 +61,5 @@ services:
       - backend
     restart: unless-stopped
 
-  # Only for a machine without Coolify. Coolify already owns ports 80 and 443.
-  proxy:
-    profiles: ["local"]
-    image: caddy:2
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - frontend
-      - backend
-    restart: unless-stopped
-
 volumes:
   backend_uploads:
-  caddy_data:
-  caddy_config:

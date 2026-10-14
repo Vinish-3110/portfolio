@@ -9,8 +9,6 @@ const adminAuth = require('../middleware/adminAuth');
 
 const uploadsDir = path.join(__dirname, '../uploads');
 
-const uploadsDir = path.join(__dirname, '../uploads');
-
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     fs.mkdirSync(uploadsDir, { recursive: true });
@@ -40,38 +38,31 @@ const deleteOldImage = (imageUrl) => {
 // @desc    Get all projects
 // @route   GET /api/projects
 router.get('/', asyncHandler(async (req, res) => {
-  const projects = await Project.find({});
-  res.json(projects);
+  res.json(await Project.find());
 }));
 
 // @desc    Create a project
 // @route   POST /api/projects
 router.post('/', adminAuth, asyncHandler(async (req, res) => {
   const { title, description, techs, live_link, github_link, is_featured, image } = req.body;
-  const project = new Project({
+  const createdProject = await Project.create({
     title,
     description,
     techs,
-    links: {
-      live: live_link,
-      github: github_link
-    },
-    image: image,
-    isFeatured: is_featured
+    live_link,
+    github_link,
+    image,
+    isFeatured: is_featured,
   });
-  const createdProject = await project.save();
   res.status(201).json(createdProject);
 }));
 
 // @desc    Delete a project
 // @route   DELETE /api/projects/:id
 router.delete('/:id', adminAuth, asyncHandler(async (req, res) => {
-  const project = await Project.findById(req.params.id);
+  const project = await Project.remove(req.params.id);
   if (project) {
-    if (project.image) {
-      deleteOldImage(project.image);
-    }
-    await project.deleteOne();
+    if (project.image) deleteOldImage(project.image);
     res.json({ message: 'Project removed' });
   } else {
     res.status(404).json({ message: 'Project not found' });
@@ -92,44 +83,27 @@ router.get('/:id', asyncHandler(async (req, res) => {
 // @desc    Update a project
 // @route   PUT /api/projects/:id
 router.put('/:id', adminAuth, upload.single('image'), asyncHandler(async (req, res) => {
-  let { title, description, techs, live_link, github_link, is_featured } = req.body;
+  const { title, description, techs, live_link, github_link, is_featured } = req.body;
   const project = await Project.findById(req.params.id);
 
-  if (project) {
-    project.title = title || project.title;
-    
-    // Parse description and techs if they are sent as strings
-    if (description) {
-      try { project.description = typeof description === 'string' ? JSON.parse(description) : description; } 
-      catch (e) { project.description = description; }
-    }
-    if (techs) {
-      try { project.techs = typeof techs === 'string' ? JSON.parse(techs) : techs; } 
-      catch (e) { project.techs = techs; }
-    }
-    
-    if (project.links) {
-      project.links.live = live_link !== undefined ? live_link : project.links.live;
-      project.links.github = github_link !== undefined ? github_link : project.links.github;
-    } else {
-      project.links = { live: live_link, github: github_link };
-    }
-    project.isFeatured = is_featured !== undefined ? (is_featured === 'true' || is_featured === true) : project.isFeatured;
-    
-    // If a new file was uploaded via multipart, use its URL
-    if (req.file) {
-      const newImageUrl = `/uploads/${req.file.filename}`;
-      if (project.image) {
-        deleteOldImage(project.image);
-      }
-      project.image = newImageUrl;
-    }
-
-    const updatedProject = await project.save();
-    res.json(updatedProject);
-  } else {
-    res.status(404).json({ message: 'Project not found' });
+  if (!project) {
+    return res.status(404).json({ message: 'Project not found' });
   }
+
+  const patch = {};
+  if (title) patch.title = title;
+  if (description) patch.description = description;
+  if (techs) patch.techs = techs;
+  if (live_link !== undefined) patch.live_link = live_link;
+  if (github_link !== undefined) patch.github_link = github_link;
+  if (is_featured !== undefined) patch.isFeatured = is_featured === 'true' || is_featured === true;
+
+  if (req.file) {
+    if (project.image) deleteOldImage(project.image);
+    patch.image = `/uploads/${req.file.filename}`;
+  }
+
+  res.json(await Project.update(req.params.id, patch));
 }));
 
 module.exports = router;

@@ -8,8 +8,7 @@ const adminAuth = require('../middleware/adminAuth');
 // @route   POST /api/enquiries
 router.post('/', asyncHandler(async (req, res) => {
   const { name, email, message } = req.body;
-  const enquiry = new Enquiry({ name, email, message });
-  await enquiry.save();
+  await Enquiry.create({ name, email, message });
   res.status(201).json({ message: 'Enquiry received' });
 }));
 
@@ -17,14 +16,13 @@ router.post('/', asyncHandler(async (req, res) => {
 // @route   GET /api/enquiries
 // @access  Admin
 router.get('/', adminAuth, asyncHandler(async (req, res) => {
-  const enquiries = await Enquiry.find({}).sort({ createdAt: -1 });
+  const enquiries = await Enquiry.find();
   res.json(enquiries);
 }));
 
 router.delete('/:id', adminAuth, asyncHandler(async (req, res) => {
-  const enquiry = await Enquiry.findById(req.params.id);
+  const enquiry = await Enquiry.remove(req.params.id);
   if (!enquiry) return res.status(404).json({ message: 'Enquiry not found' });
-  await enquiry.deleteOne();
   res.json({ message: 'Enquiry removed' });
 }));
 

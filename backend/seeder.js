@@ -1,9 +1,10 @@
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const Project = require('./models/Project');
-const Profile = require('./models/Profile');
 
 dotenv.config();
+
+const connectDB = require('./config/db').connectDB;
+const Project = require('./models/Project');
+const Profile = require('./models/Profile');
 
 const projects = [
   {
@@ -66,13 +67,13 @@ const projects = [
 
 const seedDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, { dbName: 'Portfolio' });
-    
-    await Project.deleteMany();
-    await Profile.deleteMany();
+    await connectDB();
 
-    await Project.insertMany(projects);
-    await Profile.create({ owner_email: 'admin@portfolio.com', resume_url: 'https://example.com/resume.pdf' });
+    await Project.removeAll();
+    for (const project of projects) {
+      await Project.create(project);
+    }
+    await Profile.create({ owner_email: 'admin@portfolio.com' });
 
     console.log('Database Seeded Successfully');
     process.exit(0);

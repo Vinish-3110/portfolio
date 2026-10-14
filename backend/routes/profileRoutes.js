@@ -33,14 +33,13 @@ const resumeBytes = (value) => {
 const storeResume = async (req, file) => {
   let profile = await Profile.findOne();
   if (!profile) {
-    profile = new Profile({ owner_email: 'admin@portfolio.com' });
+    profile = await Profile.create({ owner_email: 'admin@portfolio.com' });
   }
   profile.resume_data = file.buffer;
   profile.resume_filename = file.originalname || 'Vinish_Purohit_Resume.pdf';
   profile.resume_mimetype = 'application/pdf';
   profile.resume_url = resumePublicUrl();
-  await profile.save();
-  return profile;
+  return Profile.save(profile);
 };
 
 const deleteOldFile = (fileUrl) => {
@@ -57,10 +56,10 @@ const deleteOldFile = (fileUrl) => {
   }
 };
 
-// @desc    Download the resume stored in MongoDB
+// @desc    Download the resume stored in Postgres
 // @route   GET /api/profile/resume
 router.get('/resume', asyncHandler(async (req, res) => {
-  const profile = await Profile.findOne().select('+resume_data');
+  const profile = await Profile.findWithResume();
   const bytes = resumeBytes(profile?.resume_data);
   if (!bytes.length) {
     return res.status(404).json({ message: 'Resume not found' });
@@ -92,7 +91,7 @@ router.put('/', adminAuth, asyncHandler(async (req, res) => {
   const { resume_url, theme_color, about_paragraphs, stats } = req.body;
   let profile = await Profile.findOne();
   if (!profile) {
-    profile = new Profile({ owner_email: 'admin@portfolio.com' });
+    profile = await Profile.create({ owner_email: 'admin@portfolio.com' });
   }
 
   if (resume_url !== undefined && resume_url !== profile.resume_url) {
@@ -120,7 +119,7 @@ router.put('/', adminAuth, asyncHandler(async (req, res) => {
       .map((item) => ({ value: item.value || '', label: item.label || '', sub: item.sub || '' }));
   }
 
-  await profile.save();
+  profile = await Profile.save(profile);
   res.json({ message: 'Profile updated', ...presentProfile(profile) });
 }));
 

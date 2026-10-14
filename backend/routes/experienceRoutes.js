@@ -11,7 +11,7 @@ const splitList = (value) => {
 };
 
 router.get('/', asyncHandler(async (req, res) => {
-  const items = await Experience.find({}).sort({ sortOrder: 1, createdAt: 1 });
+  const items = await Experience.find();
   res.json(items);
 }));
 
@@ -35,20 +35,20 @@ router.put('/:id', adminAuth, asyncHandler(async (req, res) => {
   const item = await Experience.findById(req.params.id);
   if (!item) return res.status(404).json({ message: 'Experience not found' });
 
+  const patch = {};
   ['role', 'company', 'companyUrl', 'period', 'type', 'location', 'summary'].forEach((field) => {
-    if (req.body[field] !== undefined) item[field] = req.body[field];
+    if (req.body[field] !== undefined) patch[field] = req.body[field];
   });
-  if (req.body.achievements !== undefined) item.achievements = splitList(req.body.achievements);
-  if (req.body.technologies !== undefined) item.technologies = splitList(req.body.technologies);
-  if (req.body.sortOrder !== undefined) item.sortOrder = Number(req.body.sortOrder) || 0;
+  if (req.body.achievements !== undefined) patch.achievements = splitList(req.body.achievements);
+  if (req.body.technologies !== undefined) patch.technologies = splitList(req.body.technologies);
+  if (req.body.sortOrder !== undefined) patch.sortOrder = Number(req.body.sortOrder) || 0;
 
-  res.json(await item.save());
+  res.json(await Experience.update(req.params.id, patch));
 }));
 
 router.delete('/:id', adminAuth, asyncHandler(async (req, res) => {
-  const item = await Experience.findById(req.params.id);
+  const item = await Experience.remove(req.params.id);
   if (!item) return res.status(404).json({ message: 'Experience not found' });
-  await item.deleteOne();
   res.json({ message: 'Experience removed' });
 }));
 

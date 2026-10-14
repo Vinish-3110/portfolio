@@ -58,58 +58,11 @@ router.post('/track-visit', trackVisitLimiter, asyncHandler(async (req, res) => 
 }));
 
 router.get('/admin/stats', adminAuth, asyncHandler(async (req, res) => {
-  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-
-  const [
-    totalVisitors,
-    uniqueVisitors,
-    dailyVisitors,
-    topCountries,
-    topPages,
-    realtimeVisitors,
-  ] = await Promise.all([
-    Visitor.countDocuments(),
-    Visitor.distinct('hashed_ip').then((ips) => ips.length),
-    Visitor.aggregate([
-      {
-        $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { _id: 1 } },
-      { $project: { _id: 0, date: '$_id', count: 1 } },
-    ]),
-    Visitor.aggregate([
-      { $group: { _id: '$country', count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 10 },
-      { $project: { _id: 0, country: '$_id', count: 1 } },
-    ]),
-    Visitor.aggregate([
-      { $group: { _id: '$path', count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 10 },
-      { $project: { _id: 0, path: '$_id', count: 1 } },
-    ]),
-    Visitor.distinct('hashed_ip', { createdAt: { $gte: fiveMinutesAgo } }).then((ips) => ips.length),
-  ]);
-
-  res.json({
-    totalVisitors,
-    uniqueVisitors,
-    dailyVisitors,
-    topCountries,
-    topPages,
-    realtimeVisitors,
-  });
+  res.json(await Visitor.stats());
 }));
 
 router.get('/admin/stats/export.csv', adminAuth, asyncHandler(async (req, res) => {
-  const visits = await Visitor.find({})
-    .sort({ createdAt: -1 })
-    .select('country city userAgent path createdAt hashed_ip -_id')
-    .lean();
+  const visits = await Visitor.list();
 
   const escapeCsv = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
   const rows = [

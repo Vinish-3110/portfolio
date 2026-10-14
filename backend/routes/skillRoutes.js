@@ -7,7 +7,7 @@ const adminAuth = require('../middleware/adminAuth');
 const CATEGORIES = ['frontend', 'backend', 'database', 'devops'];
 
 router.get('/', asyncHandler(async (req, res) => {
-  const items = await Skill.find({}).sort({ sortOrder: 1, createdAt: 1 });
+  const items = await Skill.find();
   res.json(items);
 }));
 
@@ -27,21 +27,21 @@ router.put('/:id', adminAuth, asyncHandler(async (req, res) => {
   const item = await Skill.findById(req.params.id);
   if (!item) return res.status(404).json({ message: 'Skill not found' });
 
+  const patch = {};
   ['name', 'level', 'focus'].forEach((field) => {
-    if (req.body[field] !== undefined) item[field] = req.body[field];
+    if (req.body[field] !== undefined) patch[field] = req.body[field];
   });
   if (req.body.category !== undefined && CATEGORIES.includes(req.body.category)) {
-    item.category = req.body.category;
+    patch.category = req.body.category;
   }
-  if (req.body.sortOrder !== undefined) item.sortOrder = Number(req.body.sortOrder) || 0;
+  if (req.body.sortOrder !== undefined) patch.sortOrder = Number(req.body.sortOrder) || 0;
 
-  res.json(await item.save());
+  res.json(await Skill.update(req.params.id, patch));
 }));
 
 router.delete('/:id', adminAuth, asyncHandler(async (req, res) => {
-  const item = await Skill.findById(req.params.id);
+  const item = await Skill.remove(req.params.id);
   if (!item) return res.status(404).json({ message: 'Skill not found' });
-  await item.deleteOne();
   res.json({ message: 'Skill removed' });
 }));
 
