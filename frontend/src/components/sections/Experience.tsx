@@ -3,16 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink } from 'lucide-react';
-import { experienceData, ExperienceItem } from '@/data/experienceData';
-import { fetchExperiences } from '@/lib/api';
+import { ExperienceItem, fetchExperiences } from '@/lib/api';
+import { useSiteCopy } from '@/components/SiteSettings';
 
 export default function Experience() {
-  const [items, setItems] = useState<ExperienceItem[]>(experienceData);
+  const copy = useSiteCopy();
+  const [items, setItems] = useState<ExperienceItem[]>([]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     fetchExperiences()
       .then((rows) => {
-        if (!rows.length) return;
         setItems(rows.map((row) => ({
           id: row._id || row.id || row.role,
           role: row.role,
@@ -26,26 +27,28 @@ export default function Experience() {
           technologies: row.technologies || [],
         })));
       })
-      .catch(() => {});
+      .catch(() => setItems([]))
+      .finally(() => setReady(true));
   }, []);
+
+  if (!ready || items.length === 0) return null;
+
   return (
     <section id="experience" className="section-wrapper">
       <div className="container">
-        {/* Section Header */}
         <div className="section-header-block">
           <div className="section-tag">
             <span className="section-tag-dot" />
-            <span>CAREER / 03</span>
+            <span>{copy.experienceTag}</span>
           </div>
           <h2 className="section-heading-large">
-            Professional trajectory &amp; engineering milestones.
+            {copy.experienceHeading}
           </h2>
           <p className="section-subtext">
-            A chronological record of hands-on impact, product ownership, and technical contributions.
+            {copy.experienceSub}
           </p>
         </div>
 
-        {/* Editorial Timeline / Ledger */}
         <div className="experience-ledger">
           {items.map((exp, index) => (
             <motion.article
@@ -78,12 +81,18 @@ export default function Experience() {
                 </h3>
 
                 <div className="experience-meta">
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontWeight: 600 }}>
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block', boxShadow: '0 0 8px #10b981' }} />
-                    {exp.period}
-                  </span>
-                  <span style={{ margin: '0 0.5rem' }}>•</span>
-                  <span>{exp.location}</span>
+                  {exp.period && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontWeight: 600 }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block', boxShadow: '0 0 8px #10b981' }} />
+                      {exp.period}
+                    </span>
+                  )}
+                  {exp.location && (
+                    <>
+                      {exp.period && <span style={{ margin: '0 0.5rem' }}>•</span>}
+                      <span>{exp.location}</span>
+                    </>
+                  )}
                   {exp.type && (
                     <>
                       <span style={{ margin: '0 0.5rem' }}>•</span>
@@ -93,25 +102,27 @@ export default function Experience() {
                 </div>
               </div>
 
-              <p className="experience-summary">{exp.summary}</p>
+              {exp.summary && <p className="experience-summary">{exp.summary}</p>}
 
-              {/* Achievements Bullet List */}
-              <ul className="experience-achievements-list">
-                {exp.achievements.map((item, aIdx) => (
-                  <li key={aIdx} className="experience-achievement-item">
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              {exp.achievements.length > 0 && (
+                <ul className="experience-achievements-list">
+                  {exp.achievements.map((item, aIdx) => (
+                    <li key={aIdx} className="experience-achievement-item">
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              )}
 
-              {/* Tech Stack Pills */}
-              <div className="experience-tech-tags">
-                {exp.technologies.map((tech) => (
-                  <span key={tech} className="experience-tag">
-                    {tech}
-                  </span>
-                ))}
-              </div>
+              {exp.technologies.length > 0 && (
+                <div className="experience-tech-tags">
+                  {exp.technologies.map((tech) => (
+                    <span key={tech} className="experience-tag">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
             </motion.article>
           ))}
         </div>

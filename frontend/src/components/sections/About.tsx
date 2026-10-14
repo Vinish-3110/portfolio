@@ -5,19 +5,7 @@ import { motion } from 'framer-motion';
 import { FileDown, ArrowUpRight } from 'lucide-react';
 import MagneticButton from '@/components/common/MagneticButton';
 import { downloadResume } from '@/lib/api';
-
-const defaultStats = [
-  { value: '2+', label: 'Years Experience', sub: 'Production software engineering' },
-  { value: '15+', label: 'Projects & Modules', sub: 'Shipped to real users' },
-  { value: '98%', label: 'Lighthouse Target', sub: 'Performance & Accessibility' },
-  { value: '60fps', label: 'Interaction Goal', sub: 'Fluid UI micro-interactions' },
-];
-
-const defaultParagraphs = [
-  'I am a Web Developer with 2+ years of professional engineering experience, specializing in the modern JavaScript and Python ecosystems. My focus is at the intersection of robust system design and delightful, polished user interfaces.',
-  'Over the past two years, I have architected high-performance frontends with Next.js and React, built resilient Node.js and Python (FastAPI/Django) microservices, and engineered data pipelines with PostgreSQL, MongoDB, and Redis.',
-  'I care deeply about software craftsmanship: zero layout shifts, accessible semantic HTML, modular component architecture, and fluid transitions that make digital products feel alive without compromising speed.',
-];
+import { useSiteCopy } from '@/components/SiteSettings';
 
 export default function About({
   heading,
@@ -28,8 +16,9 @@ export default function About({
   paragraphs?: string[];
   stats?: { value: string; label: string; sub: string }[];
 }) {
-  const aboutParagraphs = paragraphs?.length ? paragraphs : defaultParagraphs;
-  const aboutStats = stats?.length ? stats : defaultStats;
+  const copy = useSiteCopy();
+  const aboutParagraphs = paragraphs ?? [];
+  const aboutStats = stats ?? [];
   const [resumeMessage, setResumeMessage] = useState('');
 
   const handleResumeDownload = async () => {
@@ -47,10 +36,10 @@ export default function About({
         <div className="section-header-block">
           <div className="section-tag">
             <span className="section-tag-dot" />
-            <span>ABOUT / 01</span>
+            <span>{copy.aboutTag}</span>
           </div>
           <h2 className="section-heading-large">
-            {heading || 'I build scalable, interactive, and user-focused web experiences.'}
+            {heading}
           </h2>
         </div>
 
@@ -75,7 +64,7 @@ export default function About({
                 onClick={handleResumeDownload}
                 className="btn btn-primary"
               >
-                <span>Request Resume</span>
+                <span>{copy.aboutResume}</span>
                 <FileDown size={16} />
               </MagneticButton>
               {resumeMessage && (
@@ -89,7 +78,7 @@ export default function About({
                 href="#experience"
                 className="btn btn-secondary"
               >
-                <span>View Career Timeline</span>
+                <span>{copy.aboutTimeline}</span>
                 <ArrowUpRight size={16} />
               </MagneticButton>
             </div>

@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowUp } from 'lucide-react';
 import MagneticButton from '@/components/common/MagneticButton';
+import { useSiteCopy } from '@/components/SiteSettings';
 
-export default function Footer({ displayName = 'VINISH' }: { displayName?: string }) {
+export default function Footer({ displayName = '' }: { displayName?: string }) {
+  const copy = useSiteCopy();
   const [time, setTime] = useState<string>('');
 
   useEffect(() => {
@@ -35,14 +37,14 @@ export default function Footer({ displayName = 'VINISH' }: { displayName?: strin
         {/* Left: System Status & Time */}
         <div className="footer-system-status">
           <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', backgroundColor: 'var(--accent-success)' }} />
-          <span>SYS.ONLINE</span>
+          <span>{copy.footerStatus}</span>
           <span>{"//"}</span>
-          <span>NEW DELHI (IST): {time || 'CALCULATING...'}</span>
+          <span>{copy.footerPlace}: {time}</span>
         </div>
 
         {/* Center: Tech Stack Credits */}
         <div className="footer-tech-stack">
-          ENGINEERED WITH NEXT.JS 16 & FRAMER MOTION
+          {copy.footerCredit}
         </div>
 
         {/* Right: Back to Top & Copyright */}

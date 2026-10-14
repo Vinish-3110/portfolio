@@ -3,24 +3,24 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Hyperspeed, { HyperspeedOptions } from './Hyperspeed';
 import styles from './HyperspeedLoader.module.css';
+import { useSiteSettings } from '@/components/SiteSettings';
 
 interface HyperspeedLoaderProps {
   onComplete: () => void;
   minDurationMs?: number;
 }
 
-const STATUS_MESSAGES = [
-  { threshold: 0, text: 'INITIALIZING TELEMETRY & SYSTEM CORES...' },
-  { threshold: 25, text: 'SYNTHESIZING 2+ YEARS PRODUCTION EXPERIENCE...' },
-  { threshold: 52, text: 'COMPILING FULL-STACK APPS & ARCHITECTURE...' },
-  { threshold: 78, text: 'APPROACHING TARGET: VINISH PUROHIT...' },
-  { threshold: 96, text: 'WARP COMPLETE. ENTERING WORKSPACE...' }
-];
-
 export const HyperspeedLoader: React.FC<HyperspeedLoaderProps> = ({
   onComplete,
   minDurationMs = 2800
 }) => {
+  const settings = useSiteSettings();
+  const loader = settings?.loader;
+  const copy = settings?.copy;
+  const statusMessages = (loader?.statuses?.length ? loader.statuses : ['']).map((text, index, list) => ({
+    threshold: Math.round((index / Math.max(list.length, 1)) * 96),
+    text,
+  }));
   const [progress, setProgress] = useState(0);
   const [isAccelerating, setIsAccelerating] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -54,17 +54,17 @@ export const HyperspeedLoader: React.FC<HyperspeedLoaderProps> = ({
       carShiftX: [-0.8, 0.8],
       carFloorSeparation: [0, 4.5],
       colors: {
-        roadColor: 0x06070a,
-        islandColor: 0x0a0c12,
-        background: 0x000000,
-        shoulderLines: 0x6366f1,
-        brokenLines: 0x38bdf8,
-        leftCars: [0xd856bf, 0x818cf8, 0xc084fc],
-        rightCars: [0x06b6d4, 0x0ea5e9, 0x38bdf8],
-        sticks: 0x06b6d4
+        roadColor: loader?.road || '#06070a',
+        islandColor: loader?.island || '#0a0c12',
+        background: loader?.background || '#000000',
+        shoulderLines: loader?.shoulder || '#6366f1',
+        brokenLines: loader?.brokenLines || '#38bdf8',
+        leftCars: loader?.leftCars || ['#d856bf', '#818cf8', '#c084fc'],
+        rightCars: loader?.rightCars || ['#06b6d4', '#0ea5e9', '#38bdf8'],
+        sticks: loader?.sticks || '#06b6d4',
       }
     }),
-    []
+    [loader]
   );
 
   const triggerExit = useCallback(() => {
@@ -122,13 +122,13 @@ export const HyperspeedLoader: React.FC<HyperspeedLoaderProps> = ({
 
   // Active status log message
   const currentStatus = useMemo(() => {
-    for (let i = STATUS_MESSAGES.length - 1; i >= 0; i--) {
-      if (progress >= STATUS_MESSAGES[i].threshold) {
-        return STATUS_MESSAGES[i].text;
+    for (let i = statusMessages.length - 1; i >= 0; i--) {
+      if (progress >= statusMessages[i].threshold) {
+        return statusMessages[i].text;
       }
     }
-    return STATUS_MESSAGES[0].text;
-  }, [progress]);
+    return statusMessages[0]?.text || '';
+  }, [progress, statusMessages]);
 
   // Real-time warp speed calculation
   const warpSpeed = useMemo(() => {
@@ -140,6 +140,14 @@ export const HyperspeedLoader: React.FC<HyperspeedLoaderProps> = ({
   return (
     <div
       className={`${styles.loaderWrapper} ${isExiting ? styles.exiting : ''}`}
+      style={{
+        ['--loader-bg' as string]: loader?.background,
+        ['--loader-accent' as string]: loader?.hudAccent,
+        ['--loader-secondary' as string]: loader?.hudSecondary,
+        ['--loader-highlight' as string]: loader?.hudHighlight,
+        ['--loader-title' as string]: loader?.title,
+        ['--loader-title-mid' as string]: loader?.titleMid,
+      }}
       onMouseDown={() => setIsAccelerating(true)}
       onMouseUp={() => setIsAccelerating(false)}
       onTouchStart={() => setIsAccelerating(true)}
@@ -181,11 +189,11 @@ export const HyperspeedLoader: React.FC<HyperspeedLoaderProps> = ({
       {/* Central Glassmorphism Telemetry HUD */}
       <div className={styles.hudCard}>
         <div className={styles.hudHeaderBadge}>
-          <span>SYS.TELEMETRY: CONNECTED</span>
+          <span>{copy?.loaderBadge}</span>
         </div>
 
         <h1 className={styles.mainTitle}>
-          Taking you to Vinish&apos;s work life
+          {copy?.loaderTitle}
         </h1>
 
         <div className={styles.statusLog}>
@@ -204,7 +212,7 @@ export const HyperspeedLoader: React.FC<HyperspeedLoaderProps> = ({
 
           <div className={styles.telemetryRow}>
             <span className={styles.speedMetric}>
-              WARP VELOCITY: {warpSpeed}c
+              {copy?.loaderWarp}: {warpSpeed}c
             </span>
             <span className={styles.percentageMetric}>{progress}%</span>
           </div>
@@ -218,7 +226,7 @@ export const HyperspeedLoader: React.FC<HyperspeedLoaderProps> = ({
         }`}
       >
         <span>
-          {isAccelerating ? 'HYPER-ACCELERATING...' : 'HOLD CLICK OR TOUCH TO ACCELERATE'}
+          {isAccelerating ? copy?.loaderAccelerate : copy?.loaderHold}
         </span>
       </div>
     </div>

@@ -5,7 +5,7 @@ const asyncHandler = require('express-async-handler');
 const fs = require('fs');
 const path = require('path');
 const adminAuth = require('../middleware/adminAuth');
-const { presentProfile } = require('../siteDefaults');
+const { mergeSiteSettings, presentProfile, publicAssetUrl } = require('../siteDefaults');
 
 const CONTENT_FIELDS = [
   'display_name', 'availability', 'role_badge',
@@ -14,10 +14,7 @@ const CONTENT_FIELDS = [
   'engineer_name', 'discipline', 'experience_label', 'core_focus',
 ];
 
-const resumePublicUrl = () => {
-  const base = (process.env.PUBLIC_BASE_URL || '').replace(/\/$/, '');
-  return `${base}/api/profile/resume`;
-};
+const resumePublicUrl = () => publicAssetUrl('/api/profile/resume');
 
 const isResumeFile = (file) => {
   const name = (file?.originalname || '').toLowerCase();
@@ -117,6 +114,13 @@ router.put('/', adminAuth, asyncHandler(async (req, res) => {
     profile.stats = stats
       .filter((item) => item && (item.value || item.label))
       .map((item) => ({ value: item.value || '', label: item.label || '', sub: item.sub || '' }));
+  }
+
+  if (req.body.site_settings && typeof req.body.site_settings === 'object') {
+    profile.site_settings = mergeSiteSettings(req.body.site_settings);
+    if (profile.site_settings.colors?.accent) {
+      profile.theme_color = profile.site_settings.colors.accent;
+    }
   }
 
   profile = await Profile.save(profile);

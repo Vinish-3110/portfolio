@@ -25,30 +25,28 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export const metadata: Metadata = {
-  title: "Vinish Purohit — Web Developer & Frontend Engineer (2+ Years)",
-  description:
-    "Portfolio of Vinish Purohit, a Web Developer with 2+ years of professional experience specializing in Next.js, React, Node.js, TypeScript, Python, and modern modular architectures.",
-  keywords: [
-    "Vinish Purohit",
-    "Web Developer",
-    "Frontend Engineer",
-    "Full-Stack Developer",
-    "Next.js Developer",
-    "React",
-    "TypeScript",
-    "Node.js",
-    "Python",
-    "FastAPI",
-  ],
-  authors: [{ name: "Vinish Purohit" }],
-  openGraph: {
-    title: "Vinish Purohit — Web Developer & Frontend Engineer",
-    description: "Building modern digital experiences & scalable web applications with Next.js, React, Node.js, and Python.",
-    type: "website",
-    locale: "en_US",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const base = process.env.NEXT_PUBLIC_API_URL || 'https://api.vinishpurohit.in/api';
+    const response = await fetch(`${base}/profile`, { next: { revalidate: 60 } });
+    if (!response.ok) return { title: 'Portfolio' };
+    const profile = await response.json();
+    const copy = profile.site_settings?.copy || {};
+    return {
+      title: copy.seoTitle || profile.display_name || 'Portfolio',
+      description: copy.seoDescription || profile.hero_description || '',
+      authors: profile.engineer_name ? [{ name: profile.engineer_name }] : undefined,
+      openGraph: {
+        title: copy.seoTitle || profile.display_name || 'Portfolio',
+        description: copy.seoDescription || profile.hero_description || '',
+        type: 'website',
+        locale: 'en_US',
+      },
+    };
+  } catch {
+    return { title: 'Portfolio' };
+  }
+}
 
 export default function RootLayout({
   children,

@@ -1,5 +1,7 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vinishpurohit.in/api';
 
+export const apiOrigin = (apiUrl = API_URL) => apiUrl.replace(/\/api\/?$/, '');
+
 export type Project = {
   _id?: string;
   id?: string | number;
@@ -12,8 +14,29 @@ export type Project = {
     figma?: string;
   };
   image?: string;
+  showGithub?: boolean;
   isFeatured?: boolean;
 };
+
+export type ProjectView = {
+  id: string;
+  title: string;
+  description: string[];
+  techs: string[];
+  links: {
+    live?: string;
+    github?: string;
+    figma?: string;
+  };
+  image?: string;
+};
+
+export function projectMediaUrl(url?: string) {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  const origin = apiOrigin();
+  return `${origin}${url.startsWith('/') ? url : `/${url}`}`;
+}
 
 export type ProjectPayload = {
   title: string;
@@ -21,6 +44,7 @@ export type ProjectPayload = {
   techs: string[];
   live_link?: string;
   github_link?: string;
+  show_github?: boolean;
   is_featured?: boolean;
   image?: string;
 };
@@ -64,6 +88,7 @@ export type Profile = {
   discipline?: string;
   experience_label?: string;
   core_focus?: string;
+  site_settings?: import('@/lib/siteSettings').SiteSettings;
   message?: string;
 };
 
@@ -313,6 +338,7 @@ export const uploadFile = async (file: File) => {
   });
   if (!response.ok) throw new Error('Failed to upload file');
   const data = await response.json();
-  const baseUrl = API_URL.replace('/api', '');
-  return `${baseUrl}${data.url}`;
+  if (typeof data.url === 'string' && /^https?:\/\//i.test(data.url)) return data.url;
+  const path = typeof data.url === 'string' && data.url.startsWith('/') ? data.url : `/${data.url || ''}`;
+  return `${apiOrigin()}${path}`;
 };

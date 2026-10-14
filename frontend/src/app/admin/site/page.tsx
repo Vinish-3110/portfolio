@@ -17,10 +17,9 @@ import {
   SkillItem,
   updateProfile,
 } from '@/lib/api';
-import { experienceData } from '@/data/experienceData';
-import { skillsList } from '@/data/skillsData';
 import '../admin-theme.css';
 import { ArrowLeft, Trash2 } from 'lucide-react';
+import SettingsEditor from './SettingsEditor';
 
 const emptyExperience = {
   role: '',
@@ -86,7 +85,7 @@ export default function SiteContentPage() {
     setProfile((current) => ({ ...(current || {}), [field]: value }));
   };
 
-  const saveProfile = async (event: React.FormEvent) => {
+  const saveProfile = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
     if (!profile) return;
     setSaving(true);
@@ -124,19 +123,6 @@ export default function SiteContentPage() {
     }
   };
 
-  const importExperience = async () => {
-    setError('');
-    try {
-      for (const [index, item] of experienceData.entries()) {
-        await saveExperience({ ...item, sortOrder: index }, token());
-      }
-      setExperiences(await fetchExperiences());
-      setMessage('Current experience copied into the database.');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not import experience.');
-    }
-  };
-
   const addSkill = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
@@ -147,19 +133,6 @@ export default function SiteContentPage() {
       setMessage('Skill saved.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save skill.');
-    }
-  };
-
-  const importSkills = async () => {
-    setError('');
-    try {
-      for (const [index, item] of skillsList.entries()) {
-        await saveSkill({ ...item, sortOrder: index }, token());
-      }
-      setSkills(await fetchSkills());
-      setMessage('Current skills copied into the database.');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not import skills.');
     }
   };
 
@@ -219,13 +192,17 @@ export default function SiteContentPage() {
             </div>
             <button className="action-btn-filled" disabled={saving} type="submit">{saving ? 'Saving...' : 'Save site profile'}</button>
           </form>
+          {profile.site_settings && (
+            <SettingsEditor
+              settings={profile.site_settings}
+              onChange={(site_settings) => setProfile({ ...profile, site_settings })}
+            />
+          )}
+          <button className="action-btn-filled" style={{ marginTop: '1.5rem' }} disabled={saving} type="button" onClick={(event) => saveProfile(event)}>{saving ? 'Saving...' : 'Save colours and text'}</button>
         </section>
 
         <section className="admin-card glass" style={{ marginTop: '1.5rem' }}>
           <div className="card-header"><h2>Experience</h2></div>
-          {experiences.length === 0 && (
-            <button type="button" className="action-btn-outline" onClick={importExperience}>Copy the experience already on the site</button>
-          )}
           <div className="entity-list" style={{ margin: '1rem 0' }}>
             {experiences.map((item) => (
               <div key={item._id} className="entity-item glass">
@@ -260,9 +237,6 @@ export default function SiteContentPage() {
 
         <section className="admin-card glass" style={{ marginTop: '1.5rem' }}>
           <div className="card-header"><h2>Skills</h2></div>
-          {skills.length === 0 && (
-            <button type="button" className="action-btn-outline" onClick={importSkills}>Copy the skills already on the site</button>
-          )}
           <div className="entity-list" style={{ margin: '1rem 0' }}>
             {skills.map((item) => (
               <div key={item._id} className="entity-item glass">

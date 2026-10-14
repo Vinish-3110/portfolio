@@ -3,7 +3,7 @@
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { fetchProject, updateProject } from '@/lib/api';
+import { apiOrigin, fetchProject, updateProject } from '@/lib/api';
 import '../../admin-theme.css';
 import { ArrowLeft, Save, UploadCloud, FolderGit2, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,6 +23,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
   const [techs, setTechs] = useState('');
   const [liveLink, setLiveLink] = useState('');
   const [githubLink, setGithubLink] = useState('');
+  const [showGithub, setShowGithub] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState('');
   const [projectImage, setProjectImage] = useState<File | null>(null);
@@ -42,6 +43,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
         setTechs(Array.isArray(project.techs) ? project.techs.join(', ') : project.techs || '');
         setLiveLink(project.links?.live || '');
         setGithubLink(project.links?.github || '');
+        setShowGithub(project.showGithub !== false);
         setCurrentImageUrl(project.image || '');
         setIsFeatured(project.isFeatured || false);
       })
@@ -73,6 +75,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
       formData.append('techs', JSON.stringify(techs.split(',').map(s => s.trim()).filter(Boolean)));
       formData.append('live_link', liveLink);
       formData.append('github_link', githubLink);
+      formData.append('show_github', String(showGithub));
       formData.append('is_featured', String(isFeatured));
       
       if (projectImage) {
@@ -101,7 +104,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
   const effectiveImage = imagePreview || (currentImageUrl ? (
     currentImageUrl.startsWith('http') 
       ? currentImageUrl 
-      : `${(process.env.NEXT_PUBLIC_API_URL || 'https://api.vinishpurohit.in/api').replace('/api', '')}${currentImageUrl}`
+      : `${apiOrigin()}${currentImageUrl.startsWith('/') ? currentImageUrl : `/${currentImageUrl}`}`
   ) : null);
 
   return (
@@ -228,6 +231,17 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                   placeholder="https://github.com/..."
                 />
               </div>
+            </div>
+
+            <div className="input-wrapper">
+              <label>Show code button</label>
+              <button
+                type="button"
+                className={showGithub ? 'action-btn-filled' : 'action-btn-outline'}
+                onClick={() => setShowGithub((current) => !current)}
+              >
+                {showGithub ? 'GitHub: On' : 'GitHub: Off'}
+              </button>
             </div>
             
             <div className="input-wrapper">

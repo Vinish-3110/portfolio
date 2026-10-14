@@ -12,6 +12,7 @@ import {
   fetchProfile, 
   updateProfile, 
   uploadFile, 
+  API_URL,
   Enquiry, 
   Project 
 } from '@/lib/api';
@@ -58,12 +59,16 @@ export default function AdminDashboard() {
   const [techs, setTechs] = useState('');
   const [liveLink, setLiveLink] = useState('');
   const [githubLink, setGithubLink] = useState('');
+  const [showGithub, setShowGithub] = useState(true);
   const [projectImage, setProjectImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   
   // Profile form
   const [newResumeFile, setNewResumeFile] = useState<File | null>(null);
   const [newThemeColor, setNewThemeColor] = useState('#10b981');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [profileGithub, setProfileGithub] = useState('');
   
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -92,6 +97,9 @@ export default function AdminDashboard() {
       setResumeUrl(profileData.resume_url || '');
       setThemeColor(profileData.theme_color || '#10b981');
       setNewThemeColor(profileData.theme_color || '#10b981');
+      setContactEmail(profileData.email || '');
+      setContactPhone(profileData.phone || '');
+      setProfileGithub(profileData.github || '');
     } catch {
       setError('Connection to backend failed. Make sure the server is active.');
     } finally {
@@ -129,6 +137,7 @@ export default function AdminDashboard() {
         techs: techs.split(',').map(s => s.trim()).filter(Boolean),
         live_link: liveLink,
         github_link: githubLink,
+        show_github: showGithub,
         is_featured: false,
         image: imageUrl
       };
@@ -140,6 +149,7 @@ export default function AdminDashboard() {
       setTechs('');
       setLiveLink('');
       setGithubLink('');
+      setShowGithub(true);
       setProjectImage(null);
       setImagePreview(null);
       loadData(token);
@@ -176,10 +186,17 @@ export default function AdminDashboard() {
 
       let uploadedResumeUrl = resumeUrl;
       if (newResumeFile) {
-        uploadedResumeUrl = await uploadFile(newResumeFile);
+        await uploadFile(newResumeFile);
+        uploadedResumeUrl = `${API_URL}/profile/resume`;
       }
 
-      await updateProfile({ resume_url: uploadedResumeUrl, theme_color: newThemeColor }, token);
+      await updateProfile({
+        resume_url: uploadedResumeUrl,
+        theme_color: newThemeColor,
+        email: contactEmail,
+        phone: contactPhone,
+        github: profileGithub,
+      }, token);
       setSuccess('Profile attributes and theme updated successfully.');
       setResumeUrl(uploadedResumeUrl);
       setThemeColor(newThemeColor);
@@ -465,6 +482,17 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="input-wrapper">
+                  <label>Show code button</label>
+                  <button
+                    type="button"
+                    className={showGithub ? 'action-btn-filled' : 'action-btn-outline'}
+                    onClick={() => setShowGithub((current) => !current)}
+                  >
+                    {showGithub ? 'GitHub: On' : 'GitHub: Off'}
+                  </button>
+                </div>
+
+                <div className="input-wrapper">
                   <label>Project Cover Image</label>
                   <div className="file-input-styled" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <UploadCloud size={20} style={{ color: '#10b981' }} />
@@ -516,11 +544,24 @@ export default function AdminDashboard() {
                   {resumeUrl && (
                     <p className="attribute-info">
                       <span>Current Active Resume:</span>
-                      <a href={resumeUrl} target="_blank" rel="noopener noreferrer">
+                      <a href={`${API_URL}/profile/resume`} target="_blank" rel="noopener noreferrer">
                         Preview File ({resumeUrl.split('/').pop()?.slice(0, 24) || 'Resume.pdf'})
                       </a>
                     </p>
                   )}
+                </div>
+
+                <div className="input-wrapper">
+                  <label htmlFor="profile-email">Email</label>
+                  <input id="profile-email" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="you@example.com" />
+                </div>
+                <div className="input-wrapper">
+                  <label htmlFor="profile-phone">Phone</label>
+                  <input id="profile-phone" type="text" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="+91 ..." />
+                </div>
+                <div className="input-wrapper">
+                  <label htmlFor="profile-github">GitHub URL</label>
+                  <input id="profile-github" type="url" value={profileGithub} onChange={(e) => setProfileGithub(e.target.value)} placeholder="https://github.com/..." />
                 </div>
 
                 <div className="input-wrapper">

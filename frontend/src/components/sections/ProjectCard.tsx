@@ -4,17 +4,19 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, Sparkles } from 'lucide-react';
 import { GithubIcon } from '@/components/common/Icons';
-import { ProjectCaseStudy } from '@/data/projectsData';
+import { projectMediaUrl, ProjectView } from '@/lib/api';
 import MagneticButton from '@/components/common/MagneticButton';
 import { trackProjectView } from '@/lib/analytics';
+import { useSiteCopy } from '@/components/SiteSettings';
 
 interface ProjectCardProps {
-  project: ProjectCaseStudy;
+  project: ProjectView;
   index: number;
-  onOpenModal: (project: ProjectCaseStudy) => void;
+  onOpenModal: (project: ProjectView) => void;
 }
 
 export default function ProjectCard({ project, index, onOpenModal }: ProjectCardProps) {
+  const copy = useSiteCopy();
   const isReverse = index % 2 === 1;
 
   const handleOpen = () => {
@@ -37,44 +39,24 @@ export default function ProjectCard({ project, index, onOpenModal }: ProjectCard
         data-cursor="lens"
         data-lens-text="EXPLORE ↗"
       >
-        <span className="project-overlay-badge">
-          {project.category}
-        </span>
-        <img
-          src={project.image}
-          alt={project.title}
-          className="project-preview-img"
-          loading="lazy"
-          onError={(e) => {
-            const target = e.currentTarget;
-            if (!target.dataset.failed) {
-              target.dataset.failed = 'true';
-              target.src = '/images/projects/portfolio.webp';
-            }
-          }}
-        />
+        {project.image && (
+          <img
+            src={projectMediaUrl(project.image)}
+            alt={project.title}
+            className="project-preview-img"
+            loading="lazy"
+          />
+        )}
       </div>
 
       {/* Project Information */}
       <div className="project-info-wrap">
         <span className="project-index-label">
-          PROJECT // 0{index + 1}
+          {copy.projectLabel} // 0{index + 1}
         </span>
 
         <h3 className="project-heading">{project.title}</h3>
-        <p className="project-subtitle">{project.subtitle}</p>
-
-        {/* Metrics Strip */}
-        {project.metrics && (
-          <div className="project-metrics-strip">
-            {project.metrics.map((m, mIdx) => (
-              <div key={mIdx} className="project-metric-unit">
-                <span className="metric-val-bold">{m.value}</span>
-                <span className="metric-sub-tag">{m.label}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        {project.description[0] && <p className="project-subtitle">{project.description[0]}</p>}
 
         {/* Tech Stack Tags */}
         <div className="telemetry-tech-pills">
@@ -97,7 +79,7 @@ export default function ProjectCard({ project, index, onOpenModal }: ProjectCard
             onClick={handleOpen}
             className="btn btn-primary btn-sm"
           >
-            <span>Case Study</span>
+            <span>{copy.projectCaseStudy}</span>
             <Sparkles size={14} />
           </MagneticButton>
 
@@ -109,7 +91,7 @@ export default function ProjectCard({ project, index, onOpenModal }: ProjectCard
               rel="noopener noreferrer"
               className="btn btn-secondary btn-sm"
             >
-              <span>Live</span>
+              <span>{copy.projectLive}</span>
               <ExternalLink size={13} />
             </MagneticButton>
           )}
@@ -122,7 +104,7 @@ export default function ProjectCard({ project, index, onOpenModal }: ProjectCard
               rel="noopener noreferrer"
               className="btn btn-secondary btn-sm"
             >
-              <span>Code</span>
+              <span>{copy.projectCode}</span>
               <GithubIcon size={13} />
             </MagneticButton>
           )}

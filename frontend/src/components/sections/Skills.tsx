@@ -3,56 +3,63 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Marquee from '@/components/common/Marquee';
-import { skillsCategories, skillsList, marqueeTechs, SkillItem } from '@/data/skillsData';
-import { fetchSkills } from '@/lib/api';
+import { fetchSkills, SkillItem } from '@/lib/api';
+import { useSiteCopy } from '@/components/SiteSettings';
 
 export default function Skills() {
+  const copy = useSiteCopy();
+  const skillsCategories = [
+    { id: 'all', label: copy.skillsAll },
+    { id: 'frontend', label: copy.skillsFrontend },
+    { id: 'backend', label: copy.skillsBackend },
+    { id: 'database', label: copy.skillsDatabase },
+    { id: 'devops', label: copy.skillsDevops },
+  ];
   const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [skills, setSkills] = useState<SkillItem[]>(skillsList);
-  const [marquee, setMarquee] = useState<string[]>([...marqueeTechs]);
+  const [skills, setSkills] = useState<SkillItem[]>([]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     fetchSkills()
       .then((rows) => {
-        if (!rows.length) return;
         setSkills(rows.map((row) => ({
           name: row.name,
           level: row.level || '',
           focus: row.focus || '',
           category: row.category,
         })));
-        setMarquee(rows.map((row) => row.name));
       })
-      .catch(() => {});
+      .catch(() => setSkills([]))
+      .finally(() => setReady(true));
   }, []);
+
+  if (!ready || skills.length === 0) return null;
 
   const filteredSkills = activeCategory === 'all'
     ? skills
-    : skills.filter((s) => s.category === activeCategory);
+    : skills.filter((skill) => skill.category === activeCategory);
+  const marquee = skills.map((skill) => skill.name);
 
   return (
     <section id="stack" className="section-wrapper" style={{ paddingBottom: '3rem' }}>
       <div className="container">
-        {/* Section Header */}
         <div className="section-header-block">
           <div className="section-tag">
             <span className="section-tag-dot" />
-            <span>CAPABILITIES / 02</span>
+            <span>{copy.skillsTag}</span>
           </div>
           <h2 className="section-heading-large">
-            Full-spectrum engineering stack.
+            {copy.skillsHeading}
           </h2>
           <p className="section-subtext">
-            Carefully chosen tools and frameworks engineered for developer ergonomics, scale, and high-performance user interfaces.
+            {copy.skillsSub}
           </p>
         </div>
       </div>
 
-      {/* Infinite Horizontal Marquee */}
       <Marquee items={marquee} speedSeconds={35} />
 
       <div className="container">
-        {/* Filter Tabs */}
         <div className="skills-filter-tabs">
           {skillsCategories.map((cat) => (
             <button
@@ -65,7 +72,6 @@ export default function Skills() {
           ))}
         </div>
 
-        {/* Dynamic Skill Cards Grid */}
         <motion.div layout className="skills-cards-grid">
           <AnimatePresence>
             {filteredSkills.map((skill) => (
@@ -80,9 +86,9 @@ export default function Skills() {
               >
                 <div className="skill-card-top">
                   <h3 className="skill-name">{skill.name}</h3>
-                  <span className="skill-level-badge">{skill.level}</span>
+                  {skill.level && <span className="skill-level-badge">{skill.level}</span>}
                 </div>
-                <p className="skill-focus">{skill.focus}</p>
+                {skill.focus && <p className="skill-focus">{skill.focus}</p>}
               </motion.div>
             ))}
           </AnimatePresence>

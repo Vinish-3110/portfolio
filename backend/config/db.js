@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS projects (
   techs TEXT[] NOT NULL DEFAULT '{}',
   live_link TEXT,
   github_link TEXT,
+  show_github BOOLEAN NOT NULL DEFAULT TRUE,
   figma_link TEXT,
   image TEXT,
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
@@ -128,6 +129,8 @@ CREATE TABLE IF NOT EXISTS profiles (
 const connectDB = async () => {
   await pool.query('SELECT 1');
   await pool.query(SCHEMA);
+  await pool.query('ALTER TABLE profiles ADD COLUMN IF NOT EXISTS site_settings JSONB');
+  await pool.query('ALTER TABLE projects ADD COLUMN IF NOT EXISTS show_github BOOLEAN NOT NULL DEFAULT TRUE');
   console.log('PostgreSQL connected');
 };
 

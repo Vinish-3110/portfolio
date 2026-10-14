@@ -5,18 +5,11 @@ import { Sun, Moon, Menu, X, ArrowUpRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
 import MagneticButton from '@/components/common/MagneticButton';
-
-const navLinks = [
-  { href: '#about', label: 'About', index: '01' },
-  { href: '#stack', label: 'Stack', index: '02' },
-  { href: '#experience', label: 'Experience', index: '03' },
-  { href: '#work', label: 'Works', index: '04' },
-  { href: '#contact', label: 'Contact', index: '05' },
-];
+import { useSiteCopy } from '@/components/SiteSettings';
 
 export default function Navbar({
-  displayName = 'VINISH',
-  availability = 'AVAILABLE',
+  displayName = '',
+  availability = '',
 }: {
   displayName?: string;
   availability?: string;
@@ -24,6 +17,14 @@ export default function Navbar({
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const copy = useSiteCopy();
+  const navLinks = [
+    { href: '#about', label: copy.navAbout, index: '01' },
+    { href: '#stack', label: copy.navStack, index: '02' },
+    { href: '#experience', label: copy.navExperience, index: '03' },
+    { href: '#work', label: copy.navWorks, index: '04' },
+    { href: '#contact', label: copy.navContact, index: '05' },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,11 +44,13 @@ export default function Navbar({
         <div className="container navbar-content">
           {/* Logo & Availability Status */}
           <MagneticButton as="a" href="#home" className="navbar-logo">
-            <span>{displayName}</span>
-            <span className="navbar-logo-badge">
-              <span className="navbar-pulse-dot" />
-              {availability}
-            </span>
+            {displayName && <span>{displayName}</span>}
+            {availability && (
+              <span className="navbar-logo-badge">
+                <span className="navbar-pulse-dot" />
+                {availability}
+              </span>
+            )}
           </MagneticButton>
 
           {/* Desktop Navigation Links */}
@@ -80,7 +83,7 @@ export default function Navbar({
               href="#contact"
               className="btn btn-primary btn-sm desktop-only"
             >
-              <span>Let&apos;s Talk</span>
+              <span>{copy.navCta}</span>
               <ArrowUpRight size={15} />
             </MagneticButton>
 
@@ -135,11 +138,11 @@ export default function Navbar({
                 onClick={() => setMobileMenuOpen(false)}
                 style={{ width: '100%' }}
               >
-                <span>Let&apos;s Talk</span>
+                <span>{copy.navCta}</span>
                 <ArrowUpRight size={16} />
               </a>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-                Based in India • Open to Worldwide Remote Roles
+                {copy.navNote}
               </p>
             </div>
           </motion.div>

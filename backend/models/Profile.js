@@ -4,7 +4,7 @@ const PUBLIC_COLUMNS = `
   id, resume_url, resume_filename, resume_mimetype, theme_color, owner_email,
   display_name, availability, role_badge, headline_before, headline_highlight, headline_after,
   hero_description, about_heading, about_paragraphs, stats, email, phone, linkedin, github,
-  engineer_name, discipline, experience_label, core_focus
+  engineer_name, discipline, experience_label, core_focus, site_settings
 `;
 
 const toProfile = (row) => {
@@ -69,6 +69,7 @@ const Profile = {
          discipline = $22,
          experience_label = $23,
          core_focus = $24,
+         site_settings = $25::jsonb,
          updated_at = NOW()
        WHERE id = $1
        RETURNING ${PUBLIC_COLUMNS}`,
@@ -97,6 +98,7 @@ const Profile = {
         profile.discipline || null,
         profile.experience_label || null,
         profile.core_focus || null,
+        profile.site_settings ? JSON.stringify(profile.site_settings) : null,
       ]
     );
     return toProfile(rows[0]);

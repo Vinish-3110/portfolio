@@ -13,6 +13,7 @@ const toProject = (row) => {
       github: row.github_link || '',
       figma: row.figma_link || '',
     },
+    showGithub: row.show_github !== false,
     image: row.image || '',
     isFeatured: row.is_featured,
     createdAt: row.created_at,
@@ -46,8 +47,8 @@ const Project = {
   async create(data) {
     const links = data.links || {};
     const { rows } = await query(
-      `INSERT INTO projects (title, description, techs, live_link, github_link, figma_link, image, is_featured)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO projects (title, description, techs, live_link, github_link, show_github, figma_link, image, is_featured)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         data.title,
@@ -55,6 +56,7 @@ const Project = {
         asList(data.techs),
         data.live_link ?? links.live ?? '',
         data.github_link ?? links.github ?? '',
+        data.showGithub !== undefined ? Boolean(data.showGithub) : data.show_github !== false,
         data.figma_link ?? links.figma ?? '',
         data.image || '',
         Boolean(data.isFeatured ?? data.is_featured),
@@ -74,9 +76,10 @@ const Project = {
          techs = $4,
          live_link = $5,
          github_link = $6,
-         figma_link = $7,
-         image = $8,
-         is_featured = $9,
+         show_github = $7,
+         figma_link = $8,
+         image = $9,
+         is_featured = $10,
          updated_at = NOW()
        WHERE id = $1
        RETURNING *`,
@@ -87,6 +90,7 @@ const Project = {
         data.techs !== undefined ? asList(data.techs) : current.techs,
         data.live_link !== undefined ? data.live_link : links.live,
         data.github_link !== undefined ? data.github_link : links.github,
+        data.showGithub !== undefined ? Boolean(data.showGithub) : current.showGithub !== false,
         data.figma_link !== undefined ? data.figma_link : links.figma,
         data.image !== undefined ? data.image : current.image,
         data.isFeatured !== undefined ? Boolean(data.isFeatured) : current.isFeatured,

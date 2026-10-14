@@ -13,6 +13,7 @@ import Experience from '@/components/sections/Experience';
 import Projects from '@/components/sections/Projects';
 import Contact from '@/components/sections/Contact';
 import { fetchProfile, Profile } from '@/lib/api';
+import { SiteAppearance, SiteSettingsProvider } from '@/components/SiteSettings';
 
 // Dynamic import with ssr: false for WebGL Three.js canvas
 const HyperspeedLoader = dynamic(
@@ -22,17 +23,23 @@ const HyperspeedLoader = dynamic(
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [ready, setReady] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     fetchProfile()
       .then((data) => setProfile(data))
       .catch((err) => {
-        console.warn('Profile fetch offline; using defaults:', err);
-      });
+        console.warn('Profile fetch failed:', err);
+      })
+      .finally(() => setReady(true));
   }, []);
 
+  if (!ready || !profile?.site_settings) return null;
+
   return (
+    <SiteSettingsProvider value={profile.site_settings}>
+    <SiteAppearance />
     <div className="portfolio-app">
       {/* 3D Hyperspeed Intro WebGL Loader */}
       {isLoading && (
@@ -80,6 +87,7 @@ export default function Home() {
       {/* Technical Footer */}
       <Footer displayName={profile?.display_name} />
     </div>
+    </SiteSettingsProvider>
   );
 }
 

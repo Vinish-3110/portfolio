@@ -4,14 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import {
-  githubContributionsYears,
   contributionColors,
   formatContributionDate,
   ContributionDay,
   YearContributionData,
 } from '@/data/githubContributionsData';
+import { useSiteCopy } from '@/components/SiteSettings';
 
 export default function GithubContributions() {
+  const copy = useSiteCopy();
   const [selectedYear, setSelectedYear] = useState<'2026' | '2025' | '2024'>('2026');
   const [liveYearData, setLiveYearData] = useState<Record<string, YearContributionData>>({});
   const [hoveredDay, setHoveredDay] = useState<{
@@ -40,7 +41,7 @@ export default function GithubContributions() {
     };
   }, [selectedYear]);
 
-  const activeData = liveYearData[selectedYear] || githubContributionsYears[selectedYear];
+  const activeData = liveYearData[selectedYear];
   const years: ('2026' | '2025' | '2024')[] = ['2026', '2025', '2024'];
 
   const handleCellMouseEnter = (
@@ -68,12 +69,12 @@ export default function GithubContributions() {
           {/* Calendar Top Bar */}
           <div className="github-header-row">
             <h3 className="github-total-title">
-              {activeData.totalContributions}
+              {activeData?.totalContributions}
             </h3>
 
             <div className="github-header-controls">
               <div className="github-settings-pill">
-                <span>Contribution settings</span>
+                <span>{copy.githubSettings}</span>
                 <ChevronDown size={12} />
               </div>
             </div>
@@ -85,7 +86,7 @@ export default function GithubContributions() {
               <div className="github-graph-inner">
                 {/* Months Header Labels - locked to exact column pixel positions */}
                 <div className="github-months-row">
-                  {activeData.months.map((m, idx) => (
+                  {(activeData?.months || []).map((m, idx) => (
                     <span
                       key={idx}
                       className="github-month-label"
@@ -123,7 +124,7 @@ export default function GithubContributions() {
                       transition={{ duration: 0.15 }}
                       className="github-weeks-grid"
                     >
-                      {activeData.weeks.map((week, wIdx) => (
+                      {(activeData?.weeks || []).map((week, wIdx) => (
                         <div key={wIdx} className="github-week-col">
                           {week.days.map((day, dIdx) => (
                             <div
@@ -151,11 +152,11 @@ export default function GithubContributions() {
                     rel="noopener noreferrer"
                     className="github-learn-link"
                   >
-                    Learn how we count contributions
+                    {copy.githubLearn}
                   </a>
 
                   <div className="github-legend">
-                    <span className="github-legend-text">Less</span>
+                    <span className="github-legend-text">{copy.githubLess}</span>
                     <span
                       className="github-legend-cell"
                       style={{ backgroundColor: contributionColors[0] }}
@@ -176,7 +177,7 @@ export default function GithubContributions() {
                       className="github-legend-cell"
                       style={{ backgroundColor: contributionColors[4] }}
                     />
-                    <span className="github-legend-text">More</span>
+                    <span className="github-legend-text">{copy.githubMore}</span>
                   </div>
                 </div>
               </div>

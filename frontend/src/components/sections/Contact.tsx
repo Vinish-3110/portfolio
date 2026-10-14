@@ -6,6 +6,7 @@ import { Mail, Phone, Copy, Check, Send, ArrowUpRight, Sparkles } from 'lucide-r
 import { GithubIcon, LinkedinIcon } from '@/components/common/Icons';
 import MagneticButton from '@/components/common/MagneticButton';
 import { EnquiryPayload, downloadResume, submitEnquiry } from '@/lib/api';
+import { useSiteCopy } from '@/components/SiteSettings';
 
 export default function Contact({
   email,
@@ -24,12 +25,13 @@ export default function Contact({
     message: '',
   });
   const [status, setStatus] = useState<{ type: string; message: string }>({ type: '', message: '' });
+  const copy = useSiteCopy();
   const [copiedEmail, setCopiedEmail] = useState(false);
 
-  const emailAddress = email || 'vinishpurohit3110@gmail.com';
-  const phoneNumber = phone || '+91 8107593443';
-  const githubUrl = github || 'https://github.com/Vinish-3110';
-  const linkedinUrl = linkedin || 'https://www.linkedin.com/in/vinishpurohit';
+  const emailAddress = email || '';
+  const phoneNumber = phone || '';
+  const githubUrl = github || '';
+  const linkedinUrl = linkedin || '';
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(emailAddress);
@@ -49,18 +51,15 @@ export default function Contact({
       await submitEnquiry(formData);
       setStatus({
         type: 'success',
-        message: 'Message delivered! I will get back to you shortly.',
+        message: copy.contactSuccess || '',
       });
       setFormData({ name: '', email: '', message: '' });
       setTimeout(() => setStatus({ type: '', message: '' }), 6000);
     } catch {
-      // Graceful fallback simulation if backend is cold
       setStatus({
-        type: 'success',
-        message: 'Transmission received! Thank you for reaching out.',
+        type: 'error',
+        message: copy.contactError || '',
       });
-      setFormData({ name: '', email: '', message: '' });
-      setTimeout(() => setStatus({ type: '', message: '' }), 6000);
     }
   };
 
@@ -71,7 +70,7 @@ export default function Contact({
         <div className="section-header-block">
           <div className="section-tag">
             <span className="section-tag-dot" />
-            <span>GET IN TOUCH / 05</span>
+            <span>{copy.contactTag}</span>
           </div>
         </div>
 
@@ -79,70 +78,78 @@ export default function Contact({
           {/* Left Column: Bold Statement & Direct Contact */}
           <div>
             <h2 className="contact-callout-heading">
-              Have an idea? <br />
-              <span className="hero-highlight-word">Let&apos;s build something great.</span>
+              {copy.contactHeading} <br />
+              <span className="hero-highlight-word">{copy.contactHighlight}</span>
             </h2>
 
             <p className="section-subtext" style={{ marginBottom: '1.5rem' }}>
-              Whether you are looking to build a high-performance web application, scale your backend services, or add a frontend specialist to your team — my inbox is open.
+              {copy.contactBody}
             </p>
 
             {/* 1-Click Clipboard Email Row */}
-            <div
-              className="contact-quick-copy"
-              onClick={handleCopyEmail}
-              title="Click to copy email address"
-              data-cursor="hover"
-            >
-              <Mail size={20} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-              <span className="quick-email-text">{emailAddress}</span>
-              <span className="copy-badge">
-                {copiedEmail ? (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--accent-success)' }}>
-                    <Check size={14} /> Copied!
-                  </span>
-                ) : (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <Copy size={14} /> Copy
-                  </span>
-                )}
-              </span>
-            </div>
+            {emailAddress && (
+              <div
+                className="contact-quick-copy"
+                onClick={handleCopyEmail}
+                title="Click to copy email address"
+                data-cursor="hover"
+              >
+                <Mail size={20} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+                <span className="quick-email-text">{emailAddress}</span>
+                <span className="copy-badge">
+                  {copiedEmail ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--accent-success)' }}>
+                      <Check size={14} /> {copy.contactCopied}
+                    </span>
+                  ) : (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <Copy size={14} /> {copy.contactCopy}
+                    </span>
+                  )}
+                </span>
+              </div>
+            )}
 
             {/* Social & Contact Channels */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1.5rem' }}>
-              <MagneticButton
-                as="a"
-                href={githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-secondary btn-sm"
-              >
-                <GithubIcon size={15} />
-                <span>GitHub</span>
-                <ArrowUpRight size={13} />
-              </MagneticButton>
+              {githubUrl && (
+                <MagneticButton
+                  as="a"
+                  href={githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-sm"
+                >
+                  <GithubIcon size={15} />
+                  <span>{copy.contactGithub}</span>
+                  <ArrowUpRight size={13} />
+                </MagneticButton>
+              )}
 
-              <MagneticButton
-                as="a"
-                href={linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-secondary btn-sm"
-              >
-                <LinkedinIcon size={15} />
-                <span>LinkedIn</span>
-                <ArrowUpRight size={13} />
-              </MagneticButton>
+              {linkedinUrl && (
+                <MagneticButton
+                  as="a"
+                  href={linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-sm"
+                >
+                  <LinkedinIcon size={15} />
+                  <span>{copy.contactLinkedin}</span>
+                  <ArrowUpRight size={13} />
+                </MagneticButton>
+              )}
 
-              <MagneticButton
-                as="a"
-                href={`tel:${phoneNumber.replace(/\s+/g, '')}`}
-                className="btn btn-secondary btn-sm"
-              >
-                <Phone size={15} />
-                <span>{phoneNumber}</span>
-              </MagneticButton>
+              {phoneNumber && (
+                <MagneticButton
+                  as="a"
+                  href={`tel:${phoneNumber.replace(/\s+/g, '')}`}
+                  className="btn btn-secondary btn-sm"
+                >
+                  <Phone size={15} />
+                  <span>{phoneNumber}</span>
+                </MagneticButton>
+              )}
 
               <MagneticButton
                 as="button"
@@ -151,7 +158,7 @@ export default function Contact({
                 className="btn btn-secondary btn-sm"
               >
                 <Sparkles size={15} />
-                <span>Request Resume</span>
+                <span>{copy.contactResume}</span>
               </MagneticButton>
             </div>
           </div>
@@ -161,7 +168,7 @@ export default function Contact({
             <form onSubmit={handleSubmit} className="form-group-stack">
               <div className="form-input-box">
                 <label className="form-label" htmlFor="name">
-                  YOUR NAME
+                  {copy.contactName}
                 </label>
                 <input
                   id="name"
@@ -169,7 +176,7 @@ export default function Contact({
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="e.g. Alex Morgan"
+                  placeholder={copy.contactNamePlaceholder}
                   required
                   className="form-control"
                 />
@@ -177,7 +184,7 @@ export default function Contact({
 
               <div className="form-input-box">
                 <label className="form-label" htmlFor="email">
-                  YOUR EMAIL
+                  {copy.contactEmail}
                 </label>
                 <input
                   id="email"
@@ -185,7 +192,7 @@ export default function Contact({
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="e.g. alex@example.com"
+                  placeholder={copy.contactEmailPlaceholder}
                   required
                   className="form-control"
                 />
@@ -193,14 +200,14 @@ export default function Contact({
 
               <div className="form-input-box">
                 <label className="form-label" htmlFor="message">
-                  MESSAGE
+                  {copy.contactMessage}
                 </label>
                 <textarea
                   id="message"
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder="Describe your project, timeline, or role..."
+                  placeholder={copy.contactMessagePlaceholder}
                   required
                   className="form-control"
                 />
@@ -212,7 +219,7 @@ export default function Contact({
                 style={{ width: '100%', marginTop: '0.5rem' }}
                 disabled={status.type === 'loading'}
               >
-                <span>{status.type === 'loading' ? 'Transmitting...' : 'Send Message'}</span>
+                <span>{status.type === 'loading' ? copy.contactSending : copy.contactSend}</span>
                 <Send size={16} />
               </MagneticButton>
 

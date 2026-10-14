@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Project, fetchProjects } from '@/lib/api';
+import { Project, apiOrigin, fetchProjects } from '@/lib/api';
 import { trackProjectView } from '@/lib/analytics';
 import { motion } from 'framer-motion';
 import { ExternalLink, Code2 } from 'lucide-react';
@@ -14,8 +14,7 @@ const ProjectsList = () => {
     const getImageUrl = (url: string) => {
         if (!url) return '';
         if (url.startsWith('http')) return url;
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vinishpurohit.in/api';
-        return `${API_URL.replace('/api', '')}${url}`;
+        return `${apiOrigin()}${url.startsWith('/') ? url : `/${url}`}`;
     };
 
     useEffect(() => {
@@ -91,7 +90,7 @@ const ProjectsList = () => {
                                             Live <ExternalLink size={14} />
                                         </a>
                                     )}
-                                    {project.links?.github && (
+                                    {project.showGithub !== false && project.links?.github && (
                                         <a href={project.links.github} target="_blank" className="btn btn-primary btn-sm">
                                             Code <Code2 size={14} />
                                         </a>
