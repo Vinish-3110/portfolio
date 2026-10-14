@@ -93,6 +93,10 @@ const Experience = {
     await query('DELETE FROM experiences WHERE id = $1', [id]);
     return current;
   },
+
+  async removeAll() {
+    await query('DELETE FROM experiences');
+  },
 };
 
 module.exports = Experience;

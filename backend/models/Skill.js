@@ -66,6 +66,10 @@ const Skill = {
     await query('DELETE FROM skills WHERE id = $1', [id]);
     return current;
   },
+
+  async removeAll() {
+    await query('DELETE FROM skills');
+  },
 };
 
 module.exports = Skill;
