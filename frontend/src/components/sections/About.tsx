@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileDown, ArrowUpRight } from 'lucide-react';
 import MagneticButton from '@/components/common/MagneticButton';
+import { downloadResume } from '@/lib/api';
 
 const defaultStats = [
   { value: '2+', label: 'Years Experience', sub: 'Production software engineering' },
@@ -19,18 +20,26 @@ const defaultParagraphs = [
 ];
 
 export default function About({
-  resumeUrl,
   heading,
   paragraphs,
   stats,
 }: {
-  resumeUrl?: string;
   heading?: string;
   paragraphs?: string[];
   stats?: { value: string; label: string; sub: string }[];
 }) {
   const aboutParagraphs = paragraphs?.length ? paragraphs : defaultParagraphs;
   const aboutStats = stats?.length ? stats : defaultStats;
+  const [resumeMessage, setResumeMessage] = useState('');
+
+  const handleResumeDownload = async () => {
+    setResumeMessage('');
+    try {
+      await downloadResume();
+    } catch {
+      setResumeMessage('Resume is not available right now.');
+    }
+  };
   return (
     <section id="about" className="section-wrapper">
       <div className="container">
@@ -60,26 +69,19 @@ export default function About({
             ))}
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '2rem' }}>
-              {resumeUrl ? (
-                <MagneticButton
-                  as="a"
-                  href={resumeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-primary"
-                >
-                  <span>Download CV (PDF)</span>
-                  <FileDown size={16} />
-                </MagneticButton>
-              ) : (
-                <MagneticButton
-                  as="a"
-                  href="#contact"
-                  className="btn btn-primary"
-                >
-                  <span>Request Resume</span>
-                  <FileDown size={16} />
-                </MagneticButton>
+              <MagneticButton
+                as="button"
+                type="button"
+                onClick={handleResumeDownload}
+                className="btn btn-primary"
+              >
+                <span>Request Resume</span>
+                <FileDown size={16} />
+              </MagneticButton>
+              {resumeMessage && (
+                <span style={{ alignSelf: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  {resumeMessage}
+                </span>
               )}
 
               <MagneticButton

@@ -200,6 +200,21 @@ export const fetchAnalyticsStats = async (token: string): Promise<AnalyticsStats
 };
 
 // Profile / Resume
+export const downloadResume = async () => {
+  const response = await fetch(`${API_URL}/profile/resume`);
+  if (!response.ok) throw new Error('Resume is not available');
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'Vinish_Purohit_Resume.pdf';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+};
+
 export const fetchProfile = async (): Promise<Profile> => {
   const response = await fetch(`${API_URL}/profile`);
   if (!response.ok) throw new Error('Failed to fetch profile');

@@ -5,20 +5,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Phone, Copy, Check, Send, ArrowUpRight, Sparkles } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from '@/components/common/Icons';
 import MagneticButton from '@/components/common/MagneticButton';
-import { EnquiryPayload, submitEnquiry } from '@/lib/api';
+import { EnquiryPayload, downloadResume, submitEnquiry } from '@/lib/api';
 
 export default function Contact({
-  resumeUrl,
   email,
   phone,
   github,
   linkedin,
 }: {
-  resumeUrl?: string;
   email?: string;
   phone?: string;
-  github?: string;
   linkedin?: string;
+  github?: string;
 }) {
   const [formData, setFormData] = useState<EnquiryPayload>({
     name: '',
@@ -146,18 +144,15 @@ export default function Contact({
                 <span>{phoneNumber}</span>
               </MagneticButton>
 
-              {resumeUrl && (
-                <MagneticButton
-                  as="a"
-                  href={resumeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-secondary btn-sm"
-                >
-                  <Sparkles size={15} />
-                  <span>Resume (PDF)</span>
-                </MagneticButton>
-              )}
+              <MagneticButton
+                as="button"
+                type="button"
+                onClick={() => downloadResume().catch(() => undefined)}
+                className="btn btn-secondary btn-sm"
+              >
+                <Sparkles size={15} />
+                <span>Request Resume</span>
+              </MagneticButton>
             </div>
           </div>
 

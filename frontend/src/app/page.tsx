@@ -32,8 +32,6 @@ export default function Home() {
       });
   }, []);
 
-  const resumeUrl = profile?.resume_url || '';
-
   return (
     <div className="portfolio-app">
       {/* 3D Hyperspeed Intro WebGL Loader */}
@@ -64,7 +62,6 @@ export default function Home() {
           coreFocus: profile?.core_focus,
         }} />
         <About
-          resumeUrl={resumeUrl}
           heading={profile?.about_heading}
           paragraphs={profile?.about_paragraphs}
           stats={profile?.stats}
@@ -73,7 +70,6 @@ export default function Home() {
         <Experience />
         <Projects />
         <Contact
-          resumeUrl={resumeUrl}
           email={profile?.email}
           phone={profile?.phone}
           github={profile?.github}

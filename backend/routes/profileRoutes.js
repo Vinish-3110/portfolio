@@ -14,6 +14,35 @@ const CONTENT_FIELDS = [
   'engineer_name', 'discipline', 'experience_label', 'core_focus',
 ];
 
+const resumePublicUrl = () => {
+  const base = (process.env.PUBLIC_BASE_URL || '').replace(/\/$/, '');
+  return `${base}/api/profile/resume`;
+};
+
+const isResumeFile = (file) => {
+  const name = (file?.originalname || '').toLowerCase();
+  const type = (file?.mimetype || '').toLowerCase();
+  return type === 'application/pdf' || name.endsWith('.pdf');
+};
+
+const resumeBytes = (value) => {
+  if (!value) return Buffer.alloc(0);
+  return Buffer.isBuffer(value) ? value : Buffer.from(value);
+};
+
+const storeResume = async (req, file) => {
+  let profile = await Profile.findOne();
+  if (!profile) {
+    profile = new Profile({ owner_email: 'admin@portfolio.com' });
+  }
+  profile.resume_data = file.buffer;
+  profile.resume_filename = file.originalname || 'Vinish_Purohit_Resume.pdf';
+  profile.resume_mimetype = 'application/pdf';
+  profile.resume_url = resumePublicUrl();
+  await profile.save();
+  return profile;
+};
+
 const deleteOldFile = (fileUrl) => {
   if (fileUrl && fileUrl.includes('/uploads/')) {
     try {
@@ -27,6 +56,24 @@ const deleteOldFile = (fileUrl) => {
     }
   }
 };
+
+// @desc    Download the resume stored in MongoDB
+// @route   GET /api/profile/resume
+router.get('/resume', asyncHandler(async (req, res) => {
+  const profile = await Profile.findOne().select('+resume_data');
+  const bytes = resumeBytes(profile?.resume_data);
+  if (!bytes.length) {
+    return res.status(404).json({ message: 'Resume not found' });
+  }
+
+  const filename = (profile.resume_filename || 'Vinish_Purohit_Resume.pdf').replace(/["\r\n]/g, '');
+  res.setHeader('Content-Type', profile.resume_mimetype || 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-Length', bytes.length);
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.send(bytes);
+}));
 
 // @desc    Get profile config
 // @route   GET /api/profile
@@ -78,3 +125,5 @@ router.put('/', adminAuth, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+module.exports.storeResume = storeResume;
+module.exports.isResumeFile = isResumeFile;

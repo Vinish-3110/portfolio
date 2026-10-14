@@ -12,6 +12,8 @@ interface MagneticButtonProps {
   href?: string;
   target?: string;
   rel?: string;
+  download?: string | boolean;
+  type?: 'button' | 'submit' | 'reset';
   style?: React.CSSProperties;
   disabled?: boolean;
   'aria-label'?: string;
@@ -28,6 +30,8 @@ export default function MagneticButton({
   href,
   target,
   rel,
+  download,
+  type,
   style,
   disabled,
   ...rest
@@ -69,6 +73,8 @@ export default function MagneticButton({
       href={href}
       target={target}
       rel={rel}
+      download={download}
+      type={type}
       style={style}
       disabled={disabled}
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

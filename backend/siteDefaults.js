@@ -31,7 +31,9 @@ const DEFAULT_PROFILE = {
 };
 
 const presentProfile = (profile = {}) => ({
-  resume_url: profile.resume_url || '',
+  resume_url: profile.resume_filename
+    ? `${(process.env.PUBLIC_BASE_URL || '').replace(/\/$/, '')}/api/profile/resume`
+    : (profile.resume_url || ''),
   theme_color: profile.theme_color || DEFAULT_PROFILE.theme_color,
   display_name: profile.display_name || DEFAULT_PROFILE.display_name,
   availability: profile.availability || DEFAULT_PROFILE.availability,
