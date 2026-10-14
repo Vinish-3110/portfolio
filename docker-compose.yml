@@ -9,6 +9,19 @@ services:
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://api.vinishpurohit.in}
     expose:
       - "5000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.middlewares.portfolio-api-https.redirectscheme.scheme=https
+      - traefik.http.routers.portfolio-api.entryPoints=http
+      - traefik.http.routers.portfolio-api.middlewares=portfolio-api-https
+      - traefik.http.routers.portfolio-api.rule=Host(`api.vinishpurohit.in`)
+      - traefik.http.routers.portfolio-api.service=portfolio-api
+      - traefik.http.routers.portfolio-api-secure.entryPoints=https
+      - traefik.http.routers.portfolio-api-secure.rule=Host(`api.vinishpurohit.in`)
+      - traefik.http.routers.portfolio-api-secure.tls=true
+      - traefik.http.routers.portfolio-api-secure.tls.certresolver=letsencrypt
+      - traefik.http.routers.portfolio-api-secure.service=portfolio-api
+      - traefik.http.services.portfolio-api.loadbalancer.server.port=5000
     volumes:
       - backend_uploads:/app/uploads
     restart: unless-stopped
@@ -19,14 +32,25 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.vinishpurohit.in/api}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://vinishpurohit.in}
-        NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL:-https://admin.vinishpurohit.in}
         NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.vinishpurohit.in/api}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://vinishpurohit.in}
-      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL:-https://admin.vinishpurohit.in}
     expose:
       - "3000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.middlewares.portfolio-web-https.redirectscheme.scheme=https
+      - traefik.http.routers.portfolio-web.entryPoints=http
+      - traefik.http.routers.portfolio-web.middlewares=portfolio-web-https
+      - traefik.http.routers.portfolio-web.rule=Host(`vinishpurohit.in`) || Host(`www.vinishpurohit.in`)
+      - traefik.http.routers.portfolio-web.service=portfolio-web
+      - traefik.http.routers.portfolio-web-secure.entryPoints=https
+      - traefik.http.routers.portfolio-web-secure.rule=Host(`vinishpurohit.in`) || Host(`www.vinishpurohit.in`)
+      - traefik.http.routers.portfolio-web-secure.tls=true
+      - traefik.http.routers.portfolio-web-secure.tls.certresolver=letsencrypt
+      - traefik.http.routers.portfolio-web-secure.service=portfolio-web
+      - traefik.http.services.portfolio-web.loadbalancer.server.port=3000
     depends_on:
       - backend
     restart: unless-stopped

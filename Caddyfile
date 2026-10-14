@@ -2,10 +2,6 @@ vinishpurohit.in, www.vinishpurohit.in {
 	reverse_proxy frontend:3000
 }
 
-admin.vinishpurohit.in {
-	reverse_proxy frontend:3000
-}
-
 api.vinishpurohit.in {
 	reverse_proxy backend:5000
 }

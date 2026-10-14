@@ -9,11 +9,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ARG NEXT_PUBLIC_API_URL=https://api.vinishpurohit.in/api
 ARG NEXT_PUBLIC_SITE_URL=https://vinishpurohit.in
-ARG NEXT_PUBLIC_ADMIN_URL=https://admin.vinishpurohit.in
 ARG NEXT_PUBLIC_GA_ID=
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
-ENV NEXT_PUBLIC_ADMIN_URL=$NEXT_PUBLIC_ADMIN_URL
 ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
 RUN npm run build
 
