@@ -47,6 +47,7 @@ services:
       - traefik.http.services.portfolio-api.loadbalancer.server.port=5000
     volumes:
       - backend_uploads:/app/uploads
+      - backend_images:/app/images
     restart: unless-stopped
 
   frontend:
@@ -80,4 +81,5 @@ services:
 
 volumes:
   backend_uploads:
+  backend_images:
   postgres_data:

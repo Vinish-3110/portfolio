@@ -34,8 +34,8 @@ export type ProjectView = {
 export function projectMediaUrl(url?: string) {
   if (!url) return '';
   if (url.startsWith('http')) return url;
-  const origin = apiOrigin();
-  return `${origin}${url.startsWith('/') ? url : `/${url}`}`;
+  const path = url.startsWith('/') ? url : `/${url}`;
+  return `${apiOrigin()}${path}`;
 }
 
 export type ProjectPayload = {

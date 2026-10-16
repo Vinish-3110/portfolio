@@ -52,8 +52,11 @@ app.use('/api', require('./routes/analyticsRoutes'));
 const fs = require('fs');
 const path = require('path');
 const uploadsDir = path.join(__dirname, 'uploads');
+const imagesDir = path.join(__dirname, 'images');
 fs.mkdirSync(uploadsDir, { recursive: true });
+fs.mkdirSync(imagesDir, { recursive: true });
 app.use('/uploads', express.static(uploadsDir));
+app.use('/images', express.static(imagesDir));
 
 app.get('/api/health', (req, res) => {
   res.json({ message: 'Server is running', database: 'PostgreSQL' });

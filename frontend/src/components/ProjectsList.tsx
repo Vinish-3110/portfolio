@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Project, apiOrigin, fetchProjects } from '@/lib/api';
+import { Project, fetchProjects, projectMediaUrl } from '@/lib/api';
 import { trackProjectView } from '@/lib/analytics';
 import { motion } from 'framer-motion';
 import { ExternalLink, Code2 } from 'lucide-react';
@@ -10,12 +10,6 @@ const ProjectsList = () => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewedProjects] = useState(() => new Set<string>());
-
-    const getImageUrl = (url: string) => {
-        if (!url) return '';
-        if (url.startsWith('http')) return url;
-        return `${apiOrigin()}${url.startsWith('/') ? url : `/${url}`}`;
-    };
 
     useEffect(() => {
         fetchProjects()
@@ -60,7 +54,7 @@ const ProjectsList = () => {
                         >
                             <div className="project-preview">
                                 {project.image ? (
-                                    <img src={getImageUrl(project.image)} alt={project.title} className="project-img" />
+                                    <img src={projectMediaUrl(project.image)} alt={project.title} className="project-img" />
                                 ) : (
                                     <div className="project-no-img">Modular UI Component</div>
                                 )}
